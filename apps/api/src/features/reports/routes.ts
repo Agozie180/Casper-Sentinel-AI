@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { ReportRepository } from "./types.js";
+import type { ReportRepository, StoredRiskReport } from "./types.js";
 
 /** Registers report history, detail, and Casper publication queue endpoints. */
 export function registerReportRoutes(server: FastifyInstance, repository: ReportRepository): void {
@@ -32,13 +32,43 @@ export function registerReportRoutes(server: FastifyInstance, repository: Report
       });
     }
 
+    const idempotencyKey = readIdempotencyKey(request.headers["idempotency-key"], existing);
+    if (isConflictingPublicationRequest(existing, idempotencyKey)) {
+      return reply.code(409).send({
+        traceId: request.id,
+        error: {
+          code: "PUBLICATION_ALREADY_QUEUED",
+          message: "The report already has a queued or submitted Casper publication request.",
+        },
+      });
+    }
+
+    if (existing.casperPublicationIdempotencyKey === idempotencyKey && existing.casperStatus !== "failed") {
+      return reply.code(202).send({ report: existing });
+    }
+
     const updated = await repository.updateCasperPublication(request.params.id, {
       status: "queued",
+      idempotencyKey,
       updatedAt: new Date().toISOString(),
     });
 
     return reply.code(202).send({ report: updated });
   });
+}
+
+function readIdempotencyKey(header: string | string[] | undefined, report: StoredRiskReport): string {
+  const value = Array.isArray(header) ? header[0] : header;
+  if (value !== undefined && value.trim().length > 0) return value.trim();
+  return `publish:${report.id}`;
+}
+
+function isConflictingPublicationRequest(report: StoredRiskReport, idempotencyKey: string): boolean {
+  return (
+    report.casperPublicationIdempotencyKey !== undefined &&
+    report.casperPublicationIdempotencyKey !== idempotencyKey &&
+    (report.casperStatus === "queued" || report.casperStatus === "submitted")
+  );
 }
 
 function reportNotFound(traceId: string) {

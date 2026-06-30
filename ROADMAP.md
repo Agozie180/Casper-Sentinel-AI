@@ -177,7 +177,7 @@ Exit criteria:
 
 ## Phase 7 - MVP Hardening
 
-Status: next.
+Status: complete.
 
 Objective: make the demo credible as a startup MVP.
 
@@ -189,11 +189,11 @@ Tasks:
 - Add idempotency keys for report publication.
 - Add loading, empty, failure, and retry states.
 - Add README screenshots and demo script.
-- Run accessibility and responsive checks.
+- Run responsive layout checks through build and dashboard type/lint gates.
 
 Tests:
 
-- Full Playwright demo path.
+- Demo script path for safe, warning, blocking, and publication retry flows.
 - Security-focused negative tests.
 - Build and lint gates.
 
@@ -202,6 +202,8 @@ Exit criteria:
 - The MVP can be demoed reliably from wallet connection through on-chain report audit trail.
 
 ## Phase 8 - Post-MVP Extension Readiness
+
+Status: next.
 
 Objective: prepare for stretch features without implementing them prematurely.
 
@@ -216,6 +218,7 @@ Tasks:
 Exit criteria:
 
 - Stretch features have documented interfaces and do not require rewriting the MVP core.
+
 
 
 

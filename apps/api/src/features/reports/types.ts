@@ -22,6 +22,7 @@ export interface StoredRiskReport {
   readonly casperStatus: CasperPublicationStatus;
   readonly casperTransactionHash?: string;
   readonly casperErrorMessage?: string;
+  readonly casperPublicationIdempotencyKey?: string;
   readonly signals: readonly RiskSignal[];
   readonly reasons: readonly string[];
   readonly requiredUserMessage: string;
@@ -47,6 +48,7 @@ export interface CasperPublicationUpdate {
   readonly status: CasperPublicationStatus;
   readonly transactionHash?: string;
   readonly errorMessage?: string;
+  readonly idempotencyKey?: string;
   readonly updatedAt: string;
 }
 

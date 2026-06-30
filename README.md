@@ -70,7 +70,7 @@ Sentinel follows clean architecture with feature-first application modules:
 - Contracts: Casper Rust/Wasm contract storing risk report attestations.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md), [ROADMAP.md](./ROADMAP.md), and
-[docs/decisions/0001-architecture-stack.md](./docs/decisions/0001-architecture-stack.md).
+[docs/decisions/0001-architecture-stack.md](./docs/decisions/0001-architecture-stack.md), [docs/threat-model.md](./docs/threat-model.md), and [docs/demo-script.md](./docs/demo-script.md).
 
 ## Installation
 
@@ -159,7 +159,8 @@ corepack pnpm --filter @casper-sentinel/api dev
 corepack pnpm --filter @casper-sentinel/dashboard dev
 ```
 
-The dashboard expects the API at http://localhost:4000 unless NEXT_PUBLIC_API_URL is set. The API stores local report history at REPORT_STORE_PATH, defaulting to .data/risk-reports.json.
+The dashboard expects the API at `http://localhost:4000` unless `NEXT_PUBLIC_API_URL` is set. The API stores local report history at `REPORT_STORE_PATH`, defaulting to `.data/risk-reports.json`.
+
 ## Deployment
 
 Deployment is not wired yet. The intended MVP deployment shape is:
@@ -174,7 +175,7 @@ confirmed.
 
 ## Screenshots
 
-Screenshots will be added after the dashboard has a verified local render and Playwright coverage.
+Use the demo script to capture the dashboard states for `SAFE`, `WARNING`, `BLOCK`, and publication retry flows after starting the local API and dashboard.
 
 ## Demo Flow
 
@@ -185,7 +186,7 @@ Screenshots will be added after the dashboard has a verified local render and Pl
 5. AI analyst produces a concise explanation grounded in detector evidence.
 6. Decision engine returns `APPROVE`, `WARN`, or `BLOCK`.
 7. API queues a Casper Testnet report attestation.
-8. Dashboard displays the report, score, reasoning, and on-chain reference.
+8. Dashboard displays the report, score, reasoning, and Casper publication status.
 
 ## Hackathon Compliance Checklist
 
@@ -200,7 +201,7 @@ Screenshots will be added after the dashboard has a verified local render and Pl
 
 ## Development Status
 
-Current phase: **Phase 7 - MVP Hardening**.
+Current phase: **Phase 8 - Post-MVP Extension Readiness**.
 
 Phase 1 completed:
 
@@ -250,13 +251,24 @@ Phase 6 completed:
 - API publication queue endpoint: `POST /v1/casper/reports/:id/publish`.
 - Dashboard report detail now surfaces Casper status, transaction hash when present, and publication errors.
 
-Next phase: harden the MVP demo path, policy controls, retry states, accessibility, and deployment readiness.
+Phase 7 completed:
+
+- Threat model covering assets, trust boundaries, primary threats, controls, and residual risk.
+- Dashboard policy settings for thresholds, allowlists, denylists, and denylisted wallets.
+- Idempotent Casper publication retry handling with conflict protection for competing keys.
+- Dashboard loading, empty, failure, refresh, and retry states for the demo path.
+- Demo script for safe, warning, blocking, and publication retry flows.
+- Responsive policy/detail layout refinements for mobile and desktop review.
+
+Next phase: define post-MVP extension interfaces for MCP, x402, multi-agent orchestration, monitoring, and enterprise tenancy.
 
 ## References
 
 - [Casper official developer docs](https://docs.casper.network/developers)
 - [Casper official Rust crates](https://docs.casper.network/developers/essential-crates)
 - [Casper event monitoring docs](https://docs.casper.network/developers/monitor-and-consume-events)
+
+
 
 
 
