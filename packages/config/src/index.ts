@@ -5,11 +5,16 @@ export interface AppConfig {
   readonly casperNetwork: "testnet" | "mainnet";
   readonly casperRpcUrl: string;
   readonly casperSseUrl: string;
+  readonly casperRiskReportContractHash?: string;
+  readonly casperPublisherPublicKey?: string;
   readonly reportStorePath: string;
 }
 
 /** Reads application configuration from an environment-like object with secure defaults. */
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
+  const casperRiskReportContractHash = readOptional(env.CASPER_RISK_REPORT_CONTRACT_HASH);
+  const casperPublisherPublicKey = readOptional(env.CASPER_PUBLISHER_PUBLIC_KEY);
+
   return {
     nodeEnv: parseNodeEnv(env.NODE_ENV),
     port: parsePort(env.PORT),
@@ -17,6 +22,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     casperNetwork: parseCasperNetwork(env.CASPER_NETWORK),
     casperRpcUrl: env.CASPER_RPC_URL ?? "https://node.testnet.casper.network/rpc",
     casperSseUrl: env.CASPER_SSE_URL ?? "https://node.testnet.casper.network/events/main",
+    ...(casperRiskReportContractHash !== undefined ? { casperRiskReportContractHash } : {}),
+    ...(casperPublisherPublicKey !== undefined ? { casperPublisherPublicKey } : {}),
     reportStorePath: env.REPORT_STORE_PATH ?? ".data/risk-reports.json",
   };
 }
@@ -46,4 +53,9 @@ export function parseLogLevel(value: string | undefined): AppConfig["logLevel"] 
 export function parseCasperNetwork(value: string | undefined): AppConfig["casperNetwork"] {
   if (value === "mainnet") return "mainnet";
   return "testnet";
+}
+
+function readOptional(value: string | undefined): string | undefined {
+  if (value === undefined || value.trim().length === 0) return undefined;
+  return value;
 }

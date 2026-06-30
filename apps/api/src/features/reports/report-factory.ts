@@ -34,7 +34,7 @@ export function createStoredRiskReport(
     explanation: analysis.explanation,
     explanationHash: analysis.explanationHash,
     metadataHash,
-    casperStatus: "not_queued",
+    casperStatus: "queued",
     signals: analysis.signals,
     reasons: analysis.reasons,
     requiredUserMessage: analysis.requiredUserMessage,
@@ -62,3 +62,4 @@ function stableStringify(value: unknown): string {
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+

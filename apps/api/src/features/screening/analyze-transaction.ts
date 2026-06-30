@@ -34,7 +34,7 @@ export interface AnalyzeTransactionResponse {
   readonly explanation: GroundedExplanation;
   readonly explanationHash: string;
   readonly casperPublication: {
-    readonly status: "not_queued";
+    readonly status: "queued";
     readonly reason: string;
   };
 }
@@ -69,8 +69,8 @@ export async function analyzeTransaction(
     explanation,
     explanationHash: explanation.explanationHash,
     casperPublication: {
-      status: "not_queued",
-      reason: "Casper publication is introduced after persistence and worker phases and is not simulated.",
+      status: "queued",
+      reason: "Report publication is queued for the Casper worker; no transaction hash is claimed until Casper confirms it.",
     },
   };
 }
@@ -141,4 +141,5 @@ export function toKnownContracts(
     ]),
   );
 }
+
 

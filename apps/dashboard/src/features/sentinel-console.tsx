@@ -16,6 +16,7 @@ type ReportSummary = {
   readonly decision: DecisionAction;
   readonly policyVersion: string;
   readonly casperStatus: string;
+  readonly casperTransactionHash?: string;
   readonly createdAt: string;
 };
 
@@ -61,6 +62,7 @@ type StoredReport = ReportSummary & {
   readonly explanationHash: string;
   readonly metadataHash: string;
   readonly intentHash: string;
+  readonly casperErrorMessage?: string;
   readonly confidence: number;
   readonly signals: readonly RiskSignal[];
   readonly reasons: readonly string[];
@@ -308,8 +310,12 @@ export function SentinelConsole() {
               <Metric label="Risk" value={selectedReport.riskScore.toString()} />
               <Metric label="Policy" value={selectedReport.policyVersion} />
               <Metric label="Casper" value={selectedReport.casperStatus} />
+              <Metric label="Casper tx" value={selectedReport.casperTransactionHash !== undefined ? shorten(selectedReport.casperTransactionHash) : "Pending"} />
               <Metric label="Intent hash" value={shorten(selectedReport.intentHash)} />
               <Metric label="Explanation" value={shorten(selectedReport.explanationHash)} />
+              {selectedReport.casperErrorMessage !== undefined ? (
+                <Metric label="Casper error" value={selectedReport.casperErrorMessage} />
+              ) : null}
             </div>
           ) : (
             <div className="emptyRow">Select a report.</div>
@@ -386,6 +392,9 @@ function shorten(value: string): string {
   if (value.length <= 18) return value;
   return `${value.slice(0, 8)}...${value.slice(-6)}`;
 }
+
+
+
 
 
 

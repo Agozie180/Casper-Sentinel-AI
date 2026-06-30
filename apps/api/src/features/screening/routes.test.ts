@@ -77,7 +77,7 @@ describe("screening routes", () => {
       decision: "APPROVE",
       riskScore: { value: 0, band: "LOW" },
       policyVersion: "test-mvp-policy",
-      casperPublication: { status: "not_queued" },
+      casperPublication: { status: "queued" },
     });
     expect(body.reportId).toMatch(/^[0-9a-f-]{36}$/);
     expect(typeof body.traceId).toBe("string");
@@ -188,4 +188,30 @@ describe("screening routes", () => {
     expect(response.statusCode).toBe(404);
     expect(body.error.code).toBe("REPORT_NOT_FOUND");
   });
-});
+
+  it("queues an existing report for Casper publication without fabricating a transaction hash", async () => {
+    const server = buildServer({ now: () => new Date("2026-06-30T00:00:00Z") });
+    await server.ready();
+
+    const analyzeResponse = await server.inject({
+      method: "POST",
+      url: "/v1/analyze",
+      payload: { intent: buildWarningContractCallIntent(), policy: buildPolicyPayload() },
+    });
+    const analyzed = parseJson<AnalyzeApiResponse>(analyzeResponse.body);
+    const publishResponse = await server.inject({
+      method: "POST",
+      url: `/v1/casper/reports/${analyzed.reportId}/publish`,
+    });
+    await server.close();
+
+    expect(publishResponse.statusCode).toBe(202);
+    expect(parseJson<{ report: { casperStatus: string; casperTransactionHash?: string } }>(publishResponse.body).report).toEqual(
+      expect.objectContaining({ casperStatus: "queued" }),
+    );
+    expect(
+      parseJson<{ report: { casperTransactionHash?: string } }>(publishResponse.body).report.casperTransactionHash,
+    ).toBeUndefined();
+  });});
+
+

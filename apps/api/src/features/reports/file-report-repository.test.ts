@@ -52,8 +52,22 @@ describe("FileReportRepository", () => {
 
       await expect(secondRepository.findById("newer")).resolves.toMatchObject({ id: "newer", decision: "APPROVE" });
       await expect(secondRepository.list()).resolves.toMatchObject([{ id: "newer" }, { id: "older" }]);
+      await expect(
+        secondRepository.updateCasperPublication("newer", {
+          status: "submitted",
+          transactionHash: "deploy-hash-newer",
+          updatedAt: "2026-06-30T00:01:00.000Z",
+        }),
+      ).resolves.toMatchObject({ casperStatus: "submitted", casperTransactionHash: "deploy-hash-newer" });
+
+      const thirdRepository = new FileReportRepository(filePath);
+      await expect(thirdRepository.findById("newer")).resolves.toMatchObject({
+        casperStatus: "submitted",
+        casperTransactionHash: "deploy-hash-newer",
+      });
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
   });
 });
+

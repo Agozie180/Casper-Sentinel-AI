@@ -97,6 +97,9 @@ importers:
       '@casper-sentinel/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@casper-sentinel/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
     devDependencies:
       tsx:
         specifier: latest
