@@ -1,0 +1,3 @@
+[workspace]
+members = ["contracts/risk-report-registry"]
+resolver = "2"

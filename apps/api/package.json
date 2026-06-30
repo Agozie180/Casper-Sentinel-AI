@@ -1,0 +1,28 @@
+{
+  "name": "@casper-sentinel/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/main.ts",
+    "lint": "eslint src --ext .ts",
+    "start": "node dist/main.js",
+    "test": "vitest run",
+    "typecheck": "tsc -b tsconfig.json --pretty false"
+  },
+  "dependencies": {
+    "@casper-sentinel/config": "workspace:*",
+    "@casper-sentinel/domain": "workspace:*",
+    "@casper-sentinel/risk-engine": "workspace:*",
+    "fastify": "latest",
+    "zod": "latest",
+    "@casper-sentinel/ai-agent": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "latest",
+    "vitest": "latest",
+    "@casper-sentinel/testkit": "workspace:*"
+  }
+}

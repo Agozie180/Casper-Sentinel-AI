@@ -1,0 +1,11 @@
+[package]
+name = "risk-report-registry"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Casper Sentinel AI risk report registry contract domain."
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]

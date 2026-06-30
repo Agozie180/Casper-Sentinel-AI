@@ -1,0 +1,400 @@
+:root {
+  color-scheme: dark;
+  --background: #07090d;
+  --sidebar: #090d14;
+  --surface: #111722;
+  --surface-strong: #172033;
+  --line: #293241;
+  --text: #eef4ff;
+  --muted: #96a3b8;
+  --secure: #2dd4bf;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #60a5fa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button,
+a,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  min-height: 40px;
+  border: 1px solid rgba(45, 212, 191, 0.45);
+  border-radius: 8px;
+  background: #0f766e;
+  color: white;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+input {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0b111b;
+  color: var(--text);
+  padding: 10px 12px;
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--sidebar);
+  padding: 24px;
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.brandMark {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--secure), var(--info));
+}
+
+.brand strong,
+.brand span {
+  display: block;
+}
+
+.brand span,
+.muted,
+.emptyRow,
+.metric span,
+.panelHeader span {
+  color: var(--muted);
+}
+
+nav {
+  display: grid;
+  gap: 8px;
+}
+
+nav a {
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+nav a:first-child,
+nav a:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.workspace {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  padding: 28px;
+}
+
+.topbar,
+.panelHeader,
+.statusCluster {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.statusCluster {
+  justify-content: flex-end;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--secure);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 3vw, 3.5rem);
+}
+
+h2 {
+  font-size: 1rem;
+}
+
+h3 {
+  font-size: 0.92rem;
+}
+
+.analysisGrid,
+.explanationGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr);
+  gap: 18px;
+}
+
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  padding: 18px;
+}
+
+.alert {
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  color: #fecaca;
+  padding: 12px 14px;
+}
+
+.statusPill {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  min-width: 112px;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+.statusPill.approve,
+.decisionBadge.approve {
+  color: var(--secure);
+}
+
+.statusPill.warn,
+.decisionBadge.warn {
+  color: var(--warning);
+}
+
+.statusPill.block,
+.decisionBadge.block {
+  color: var(--danger);
+}
+
+.analysisForm {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.analysisForm label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.segmented button {
+  border-color: var(--line);
+  background: #0b111b;
+  color: var(--muted);
+  padding: 0 8px;
+}
+
+.segmented button.active {
+  border-color: rgba(96, 165, 250, 0.6);
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.decisionPanel {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.decisionBadge {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  color: var(--muted);
+  font-weight: 800;
+  padding: 22px;
+  text-align: center;
+}
+
+.scoreGrid,
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.detailGrid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-top: 16px;
+}
+
+.metric {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0b111b;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.metric strong {
+  overflow-wrap: anywhere;
+}
+
+.explanationPanel,
+.detailPanel {
+  display: grid;
+  gap: 14px;
+}
+
+.evidenceList {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0b111b;
+  padding: 14px;
+}
+
+.evidenceList ul {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.evidenceList li,
+.recommendation {
+  color: #dbe7f8;
+  line-height: 1.5;
+}
+
+.tableHeader,
+.reportRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 0.45fr 0.7fr 0.8fr;
+  gap: 12px;
+}
+
+.tableHeader {
+  margin-top: 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  padding-bottom: 10px;
+}
+
+.reportList {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.reportRow {
+  min-height: 44px;
+  width: 100%;
+  border-color: transparent;
+  background: transparent;
+  color: var(--text);
+  padding: 10px 0;
+  text-align: left;
+}
+
+.reportRow:hover {
+  border-color: var(--line);
+  background: #0b111b;
+  padding-inline: 10px;
+}
+
+.reportRow span,
+.tableHeader span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.emptyRow {
+  padding: 18px 0 4px;
+}
+
+@media (max-width: 1050px) {
+  .detailGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .shell,
+  .analysisGrid,
+  .explanationGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  nav a {
+    text-align: center;
+  }
+
+  .topbar,
+  .statusCluster {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .scoreGrid,
+  .detailGrid,
+  .tableHeader,
+  .reportRow {
+    grid-template-columns: 1fr 0.6fr;
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@casper-sentinel/ai-agent": [
+        "packages/ai-agent/src/index.ts"
+      ],
+      "@casper-sentinel/casper": [
+        "packages/casper/src/index.ts"
+      ],
+      "@casper-sentinel/config": [
+        "packages/config/src/index.ts"
+      ],
+      "@casper-sentinel/domain": [
+        "packages/domain/src/index.ts"
+      ],
+      "@casper-sentinel/risk-engine": [
+        "packages/risk-engine/src/index.ts"
+      ],
+      "@casper-sentinel/testkit": [
+        "packages/testkit/src/index.ts"
+      ],
+      "@casper-sentinel/ui": [
+        "packages/ui/src/index.ts"
+      ]
+    },
+    "ignoreDeprecations": "6.0",
+    "types": [
+      "node"
+    ]
+  }
+}

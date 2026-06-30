@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum DecisionAction {
+  APPROVE
+  WARN
+  BLOCK
+}
+
+enum CasperPublicationStatus {
+  not_queued
+  queued
+  submitted
+  confirmed
+  failed
+}
+
+model RiskReport {
+  id                    String                  @id
+  traceId               String
+  walletAddress         String
+  target                String
+  transactionKind       String
+  transactionHash       String?
+  intentHash            String
+  riskScore             Int
+  riskBand              String
+  confidence            Float
+  decision              DecisionAction
+  policyVersion         String
+  explanation           Json
+  explanationHash       String
+  metadataHash          String
+  casperStatus          CasperPublicationStatus @default(not_queued)
+  casperTransactionHash String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  signals               RiskSignal[]
+
+  @@index([walletAddress])
+  @@index([decision])
+  @@index([createdAt])
+}
+
+model RiskSignal {
+  id         String     @id
+  reportId   String
+  detectorId String
+  category   String
+  severity   Float
+  confidence Float
+  impact     String
+  observed   Json
+  inferred   Json
+  evidence   Json
+  report     RiskReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+  @@index([detectorId])
+}

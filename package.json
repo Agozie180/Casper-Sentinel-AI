@@ -1,0 +1,30 @@
+{
+  "name": "casper-sentinel-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Autonomous pre-execution security layer for Casper AI agents and wallets.",
+  "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build": "corepack pnpm -r --sort build",
+    "dev": "corepack pnpm -r --parallel dev",
+    "format": "prettier --write .",
+    "lint": "corepack pnpm -r --sort lint",
+    "test": "corepack pnpm -r --sort test",
+    "typecheck": "corepack pnpm -r --sort typecheck",
+    "verify": "corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "latest",
+    "@types/node": "latest",
+    "eslint": "latest",
+    "prettier": "latest",
+    "turbo": "latest",
+    "typescript": "latest",
+    "typescript-eslint": "latest",
+    "vitest": "latest"
+  }
+}

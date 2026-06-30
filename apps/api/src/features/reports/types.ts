@@ -1,0 +1,46 @@
+import type { GroundedExplanation } from "@casper-sentinel/ai-agent";
+import type { DecisionAction, RiskBand, RiskSignal, TransactionKind } from "@casper-sentinel/domain";
+
+export interface StoredRiskReport {
+  readonly id: string;
+  readonly traceId: string;
+  readonly walletAddress: string;
+  readonly target: string;
+  readonly transactionKind: TransactionKind;
+  readonly transactionHash?: string;
+  readonly intentHash: string;
+  readonly riskScore: number;
+  readonly riskBand: RiskBand;
+  readonly confidence: number;
+  readonly decision: DecisionAction;
+  readonly policyVersion: string;
+  readonly explanation: GroundedExplanation;
+  readonly explanationHash: string;
+  readonly metadataHash: string;
+  readonly casperStatus: "not_queued" | "queued" | "submitted" | "confirmed" | "failed";
+  readonly casperTransactionHash?: string;
+  readonly signals: readonly RiskSignal[];
+  readonly reasons: readonly string[];
+  readonly requiredUserMessage: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface ReportSummary {
+  readonly id: string;
+  readonly walletAddress: string;
+  readonly target: string;
+  readonly transactionKind: TransactionKind;
+  readonly riskScore: number;
+  readonly riskBand: RiskBand;
+  readonly decision: DecisionAction;
+  readonly policyVersion: string;
+  readonly casperStatus: StoredRiskReport["casperStatus"];
+  readonly createdAt: string;
+}
+
+export interface ReportRepository {
+  save(report: StoredRiskReport): Promise<StoredRiskReport>;
+  list(): Promise<readonly ReportSummary[]>;
+  findById(id: string): Promise<StoredRiskReport | undefined>;
+}
