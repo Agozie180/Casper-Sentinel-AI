@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "references": [
+    {
+      "path": "../../packages/ai-agent"
+    },
+    {
+      "path": "../../packages/config"
+    },
+    {
+      "path": "../../packages/domain"
+    },
+    {
+      "path": "../../packages/risk-engine"
+    },
+    {
+      "path": "../../packages/testkit"
+    }
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "references": [
+    {
+      "path": "../domain"
+    },
+    {
+      "path": "../risk-engine"
+    },
+    {
+      "path": "../testkit"
+    }
+  ],
+  "include": [
+    "src/**/*.ts"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@casper-sentinel/ai-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest run",
+    "typecheck": "tsc -b tsconfig.json --pretty false"
+  },
+  "dependencies": {
+    "@casper-sentinel/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@casper-sentinel/risk-engine": "workspace:*",
+    "@casper-sentinel/testkit": "workspace:*",
+    "vitest": "latest"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
