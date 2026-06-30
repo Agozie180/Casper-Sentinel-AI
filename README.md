@@ -54,7 +54,7 @@ casper-sentinel/
     testkit/             Test fixtures
     ui/                  Shared visual tokens
   contracts/
-    risk-report-registry/ Rust contract-domain validation crate
+    risk-report-registry/ Rust risk report registry contract core
   docs/
     decisions/           Architecture decision records
 ```
@@ -127,8 +127,7 @@ runs on port `3000` by default.
 
 The endpoint returns a deterministic security decision with evidence-backed signals and a grounded
 AI analyst explanation. Successful analyses are stored in the durable local report repository and can be
-retrieved through `GET /v1/reports` and `GET /v1/reports/:id`. It does not publish or pretend to
-publish to Casper in this phase.
+retrieved through `GET /v1/reports` and `GET /v1/reports/:id`. Successful analyses enter `queued` Casper publication status. The worker and publisher package can advance a report to `submitted`, `confirmed`, or `failed` only from an injected Casper gateway result; the API never fabricates a transaction hash.
 
 ## AI Analyst Contract
 
@@ -160,7 +159,7 @@ corepack pnpm --filter @casper-sentinel/api dev
 corepack pnpm --filter @casper-sentinel/dashboard dev
 ```
 
-The dashboard expects the API at `http://localhost:4000` unless `NEXT_PUBLIC_API_URL` is set. The API stores local report history at `REPORT_STORE_PATH`, defaulting to `.data/risk-reports.json`.
+The dashboard expects the API at http://localhost:4000 unless NEXT_PUBLIC_API_URL is set. The API stores local report history at REPORT_STORE_PATH, defaulting to .data/risk-reports.json.
 ## Deployment
 
 Deployment is not wired yet. The intended MVP deployment shape is:
@@ -201,7 +200,7 @@ Screenshots will be added after the dashboard has a verified local render and Pl
 
 ## Development Status
 
-Current phase: **Phase 6 - Casper Contract and Publisher**.
+Current phase: **Phase 7 - MVP Hardening**.
 
 Phase 1 completed:
 
@@ -224,7 +223,7 @@ Phase 3 completed:
 - The API returns `APPROVE`, `WARN`, or `BLOCK` using the deterministic risk engine.
 - Responses include trace ID, score, signals, reasons, policy version, and deterministic explanation fields.
 - Invalid input returns a stable `VALIDATION_ERROR` response.
-- Casper publication is explicitly returned as `not_queued` and is not simulated.
+- Casper publication was intentionally left unqueued in this phase and no chain result was simulated.
 
 Phase 4 completed:
 
@@ -238,18 +237,27 @@ Phase 4 completed:
 Phase 5 completed:
 
 - PostgreSQL/Prisma schema for risk reports and detector signals.
-- In-process report repository for local MVP runs and API tests.
+- Durable local report repository for MVP runs and in-process repository for API tests.
 - `POST /v1/analyze` now stores each successful analysis as a risk report.
 - `GET /v1/reports` and `GET /v1/reports/:id` expose audit history and detail.
 - Dashboard includes wallet connection surface, analyze form, decision panel, analyst explanation, report list, and report detail.
 
-Next phase: implement the Casper Testnet risk report registry contract and publisher workflow.
+Phase 6 completed:
+
+- Rust `risk-report-registry` contract core with `record_report`, `get_report`, wallet indexing, and `ReportRecorded` event semantics.
+- TypeScript Casper publisher package with attestation validation and `record_report` deploy-call payload construction.
+- Worker publication job that moves queued reports to `submitted`, `confirmed`, or `failed` only from publisher results.
+- API publication queue endpoint: `POST /v1/casper/reports/:id/publish`.
+- Dashboard report detail now surfaces Casper status, transaction hash when present, and publication errors.
+
+Next phase: harden the MVP demo path, policy controls, retry states, accessibility, and deployment readiness.
 
 ## References
 
 - [Casper official developer docs](https://docs.casper.network/developers)
 - [Casper official Rust crates](https://docs.casper.network/developers/essential-crates)
 - [Casper event monitoring docs](https://docs.casper.network/developers/monitor-and-consume-events)
+
 
 
 

@@ -158,8 +158,8 @@ off-chain later.
 
 ### Casper Publisher
 
-Submits report data to the Casper contract, tracks pending status, confirms success, and updates
-the dashboard. It must distinguish `queued`, `submitted`, `confirmed`, and `failed` states.
+Submits report data to the Casper contract through an explicit publisher gateway, tracks pending status, confirms success, and updates
+the dashboard. The gateway boundary prevents the application from claiming submission or confirmation without a real deploy result. It must distinguish `queued`, `submitted`, `confirmed`, and `failed` states.
 
 ## Smart Contract Design
 
@@ -177,7 +177,7 @@ Required storage fields:
 
 Entry points:
 
-- `record_report(report)` stores a report attestation and emits an event.
+- `record_report(report)` stores a report attestation and emits a `ReportRecorded` event.
 - `get_report(report_id)` returns a stored report.
 - `get_reports_by_wallet(wallet_address)` supports dashboard lookups where feasible.
 
@@ -290,3 +290,4 @@ Casper is a smart-contracting platform backed by Proof-of-Stake and WebAssembly.
 docs list Rust crates including `casper-contract`, `casper-types`, `casper-client`,
 `casper-event-standard`, and `cargo-casper`, and document JSON-RPC plus SSE event monitoring for
 dApps. The contract and chain adapters should follow those official interfaces.
+

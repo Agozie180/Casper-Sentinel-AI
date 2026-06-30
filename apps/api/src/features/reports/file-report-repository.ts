@@ -1,7 +1,7 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { ReportRepository, ReportSummary, StoredRiskReport } from "./types.js";
-import { toSummary } from "./in-memory-report-repository.js";
+import type { CasperPublicationUpdate, ReportRepository, ReportSummary, StoredRiskReport } from "./types.js";
+import { applyCasperPublicationUpdate, toSummary } from "./in-memory-report-repository.js";
 
 interface ReportStoreFile {
   readonly version: 1;
@@ -27,6 +27,19 @@ export class FileReportRepository implements ReportRepository {
   async findById(id: string): Promise<StoredRiskReport | undefined> {
     const reports = await this.readAll();
     return reports.find((report) => report.id === id);
+  }
+
+  async updateCasperPublication(
+    id: string,
+    update: CasperPublicationUpdate,
+  ): Promise<StoredRiskReport | undefined> {
+    const reports = await this.readAll();
+    const existing = reports.find((report) => report.id === id);
+    if (existing === undefined) return undefined;
+
+    const updated = applyCasperPublicationUpdate(existing, update);
+    await this.writeAll([updated, ...reports.filter((report) => report.id !== id)]);
+    return updated;
   }
 
   private async readAll(): Promise<StoredRiskReport[]> {
@@ -79,6 +92,7 @@ function isStoredRiskReport(value: unknown): value is StoredRiskReport {
     typeof record.metadataHash === "string" &&
     typeof record.casperStatus === "string" &&
     (record.casperTransactionHash === undefined || typeof record.casperTransactionHash === "string") &&
+    (record.casperErrorMessage === undefined || typeof record.casperErrorMessage === "string") &&
     Array.isArray(record.signals) &&
     Array.isArray(record.reasons) &&
     typeof record.requiredUserMessage === "string" &&
@@ -95,4 +109,3 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && "code" in error;
 }
-

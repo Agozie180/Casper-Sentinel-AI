@@ -47,7 +47,7 @@ describe("analyzeTransaction", () => {
       traceId: "trace-safe",
       decision: "APPROVE",
       riskScore: { value: 0, band: "LOW" },
-      casperPublication: { status: "not_queued" },
+      casperPublication: { status: "queued" },
     });
     expect(response.explanation.observedEvidence[0]).toContain("No detector");
   });
@@ -71,7 +71,8 @@ describe("analyzeTransaction", () => {
 
     expect(response.decision).toBe("BLOCK");
     expect(response.reasons.join(" ")).toContain("denylist");
-    expect(response.casperPublication.reason).toContain("not simulated");
+    expect(response.casperPublication.reason).toContain("no transaction hash is claimed");
   });
 });
+
 

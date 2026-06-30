@@ -13,8 +13,9 @@
     "typecheck": "tsc -b tsconfig.json --pretty false"
   },
   "dependencies": {
+    "@casper-sentinel/casper": "workspace:*",
     "@casper-sentinel/config": "workspace:*",
-    "@casper-sentinel/casper": "workspace:*"
+    "@casper-sentinel/domain": "workspace:*"
   },
   "devDependencies": {
     "tsx": "latest",

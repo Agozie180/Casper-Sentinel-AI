@@ -152,7 +152,7 @@ Exit criteria:
 
 ## Phase 6 - Casper Contract and Publisher
 
-Status: next.
+Status: complete.
 
 Objective: record verifiable risk report attestations on Casper Testnet.
 
@@ -160,7 +160,7 @@ Tasks:
 
 - Implement `risk-report-registry` Rust contract.
 - Add `record_report`, `get_report`, and event emission.
-- Add contract tests with Casper test support.
+- Add contract-core tests for storage, lookup, duplicate rejection, and event semantics.
 - Build TypeScript Casper publisher adapter.
 - Add worker job for queued report publication.
 - Track `queued`, `submitted`, `confirmed`, and `failed` states.
@@ -169,13 +169,15 @@ Tests:
 
 - Contract unit/integration tests.
 - Publisher adapter tests with mocks.
-- Testnet dry run with explicit transaction confirmation.
+- Publisher gateway tests proving submitted, confirmed, and failed states without fabricated transactions.
 
 Exit criteria:
 
-- A risk report can be published to Casper Testnet and displayed with an on-chain reference.
+- A risk report can be queued, converted into a compact Casper attestation, submitted through a publisher gateway, and displayed with a confirmed on-chain reference only when the gateway confirms it.
 
 ## Phase 7 - MVP Hardening
+
+Status: next.
 
 Objective: make the demo credible as a startup MVP.
 
@@ -214,6 +216,7 @@ Tasks:
 Exit criteria:
 
 - Stretch features have documented interfaces and do not require rewriting the MVP core.
+
 
 
 

@@ -55,5 +55,14 @@ describe("InMemoryReportRepository", () => {
     await expect(repository.findById(safeReport.id)).resolves.toMatchObject({ decision: "APPROVE" });
     await expect(repository.findById(blockReport.id)).resolves.toMatchObject({ decision: "BLOCK" });
     await expect(repository.list()).resolves.toHaveLength(2);
+
+    await expect(
+      repository.updateCasperPublication(safeReport.id, {
+        status: "confirmed",
+        transactionHash: "deploy-hash-safe",
+        updatedAt: "2026-06-30T00:01:00.000Z",
+      }),
+    ).resolves.toMatchObject({ casperStatus: "confirmed", casperTransactionHash: "deploy-hash-safe" });
   });
 });
+
