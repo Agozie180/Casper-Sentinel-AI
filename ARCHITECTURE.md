@@ -273,7 +273,7 @@ contract_registry
 - Analyze: wallet connection, transaction preview, risk result, decision panel.
 - Reports: searchable audit table with score, decision, wallet, date, and on-chain status.
 - Report detail: evidence, AI explanation, detector signals, policy decision, Casper reference.
-- Settings: local MVP policy thresholds and allowlist/denylist configuration.
+- Settings: local MVP policy thresholds, allowlist/denylist configuration, publication retry status, and idempotency feedback.
 
 ## Extension Points
 
@@ -290,4 +290,5 @@ Casper is a smart-contracting platform backed by Proof-of-Stake and WebAssembly.
 docs list Rust crates including `casper-contract`, `casper-types`, `casper-client`,
 `casper-event-standard`, and `cargo-casper`, and document JSON-RPC plus SSE event monitoring for
 dApps. The contract and chain adapters should follow those official interfaces.
+
 

@@ -224,6 +224,12 @@ h3 {
   font-size: 0.88rem;
 }
 
+.secondaryButton {
+  border-color: var(--line);
+  background: #0b111b;
+  color: var(--text);
+}
+
 .segmented {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -398,3 +404,27 @@ h3 {
     grid-template-columns: 1fr 0.6fr;
   }
 }
+
+@media (max-width: 620px) {
+  .policyGrid,
+  .scoreGrid,
+  .detailGrid,
+  .tableHeader,
+  .reportRow {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace,
+  .sidebar {
+    padding: 18px;
+  }
+
+  .detailActions {
+    justify-content: stretch;
+  }
+
+  .detailActions button {
+    width: 100%;
+  }
+}
+

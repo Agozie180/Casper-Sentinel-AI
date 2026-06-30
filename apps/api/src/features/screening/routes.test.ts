@@ -202,6 +202,7 @@ describe("screening routes", () => {
     const publishResponse = await server.inject({
       method: "POST",
       url: `/v1/casper/reports/${analyzed.reportId}/publish`,
+      headers: { "idempotency-key": "demo-publication-1" },
     });
     await server.close();
 
@@ -210,8 +211,66 @@ describe("screening routes", () => {
       expect.objectContaining({ casperStatus: "queued" }),
     );
     expect(
+      parseJson<{ report: { casperTransactionHash?: string; casperPublicationIdempotencyKey?: string } }>(publishResponse.body).report,
+    ).toMatchObject({ casperPublicationIdempotencyKey: "demo-publication-1" });
+    expect(
       parseJson<{ report: { casperTransactionHash?: string } }>(publishResponse.body).report.casperTransactionHash,
     ).toBeUndefined();
+  });
+  it("treats repeated publication requests with the same idempotency key as safe retries", async () => {
+    const server = buildServer({ now: () => new Date("2026-06-30T00:00:00Z") });
+    await server.ready();
+
+    const analyzeResponse = await server.inject({
+      method: "POST",
+      url: "/v1/analyze",
+      payload: { intent: buildWarningContractCallIntent(), policy: buildPolicyPayload() },
+    });
+    const analyzed = parseJson<AnalyzeApiResponse>(analyzeResponse.body);
+    const first = await server.inject({
+      method: "POST",
+      url: `/v1/casper/reports/${analyzed.reportId}/publish`,
+      headers: { "idempotency-key": "retry-key" },
+    });
+    const second = await server.inject({
+      method: "POST",
+      url: `/v1/casper/reports/${analyzed.reportId}/publish`,
+      headers: { "idempotency-key": "retry-key" },
+    });
+    await server.close();
+
+    expect(first.statusCode).toBe(202);
+    expect(second.statusCode).toBe(202);
+    expect(parseJson<{ report: { casperPublicationIdempotencyKey?: string } }>(second.body).report).toMatchObject({
+      casperPublicationIdempotencyKey: "retry-key",
+    });
+  });
+
+  it("rejects competing publication idempotency keys while a report is queued", async () => {
+    const server = buildServer({ now: () => new Date("2026-06-30T00:00:00Z") });
+    await server.ready();
+
+    const analyzeResponse = await server.inject({
+      method: "POST",
+      url: "/v1/analyze",
+      payload: { intent: buildWarningContractCallIntent(), policy: buildPolicyPayload() },
+    });
+    const analyzed = parseJson<AnalyzeApiResponse>(analyzeResponse.body);
+    await server.inject({
+      method: "POST",
+      url: `/v1/casper/reports/${analyzed.reportId}/publish`,
+      headers: { "idempotency-key": "first-key" },
+    });
+    const conflict = await server.inject({
+      method: "POST",
+      url: `/v1/casper/reports/${analyzed.reportId}/publish`,
+      headers: { "idempotency-key": "second-key" },
+    });
+    await server.close();
+
+    expect(conflict.statusCode).toBe(409);
+    expect(parseJson<ErrorResponse>(conflict.body).error.code).toBe("PUBLICATION_ALREADY_QUEUED");
   });});
+
 
 

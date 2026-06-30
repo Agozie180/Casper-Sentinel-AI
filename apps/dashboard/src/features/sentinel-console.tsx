@@ -63,17 +63,41 @@ type StoredReport = ReportSummary & {
   readonly metadataHash: string;
   readonly intentHash: string;
   readonly casperErrorMessage?: string;
+  readonly casperPublicationIdempotencyKey?: string;
   readonly confidence: number;
   readonly signals: readonly RiskSignal[];
   readonly reasons: readonly string[];
   readonly requiredUserMessage: string;
 };
 
+type PolicySettings = {
+  readonly version: string;
+  readonly warnScore: string;
+  readonly blockScore: string;
+  readonly highValueMotes: string;
+  readonly blockValueMotes: string;
+  readonly maxApprovalMotes: string;
+  readonly allowlistedTargets: string;
+  readonly denylistedTargets: string;
+  readonly denylistedWallets: string;
+};
+
 type AnalyzeMode = "safe" | "warning" | "block";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const navigationItems = ["Analyze", "Policy", "Reports", "Detail"] as const;
 
-const navigationItems = ["Analyze", "Reports", "Detail"] as const;
+const defaultPolicy: PolicySettings = {
+  version: "dashboard-mvp-policy",
+  warnScore: "40",
+  blockScore: "80",
+  highValueMotes: "100000000000",
+  blockValueMotes: "1000000000000",
+  maxApprovalMotes: "500000000000",
+  allowlistedTargets: "hash-trusted-contract",
+  denylistedTargets: "hash-blocked-contract",
+  denylistedWallets: "",
+};
 
 export function SentinelConsole() {
   const [walletAddress, setWalletAddress] = useState("account-hash-sender");
@@ -82,12 +106,14 @@ export function SentinelConsole() {
   const [amountMotes, setAmountMotes] = useState("2500000000");
   const [entryPoint, setEntryPoint] = useState("transfer");
   const [mode, setMode] = useState<AnalyzeMode>("safe");
+  const [policy, setPolicy] = useState<PolicySettings>(defaultPolicy);
   const [reports, setReports] = useState<readonly ReportSummary[]>([]);
   const [selectedReport, setSelectedReport] = useState<StoredReport | undefined>();
   const [analysis, setAnalysis] = useState<AnalyzeResponse | undefined>();
   const [status, setStatus] = useState("Ready");
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const activeWallet = connectedWallet ?? walletAddress;
   const scoreTone = analysis?.decision.toLowerCase() ?? "idle";
@@ -122,7 +148,7 @@ export function SentinelConsole() {
       const response = await fetch(`${apiBaseUrl}/v1/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent: intentPreview }),
+        body: JSON.stringify({ intent: intentPreview, policy: buildPolicyPayload(policy) }),
       });
       const body = (await response.json()) as AnalyzeResponse | { error?: { message?: string } };
       if (!response.ok || isErrorResponse(body)) {
@@ -149,6 +175,30 @@ export function SentinelConsole() {
       setSelectedReport(body.report);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Report detail is unavailable.");
+    }
+  }
+
+  async function retryPublication(id: string) {
+    setIsPublishing(true);
+    setError(undefined);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/v1/casper/reports/${id}/publish`, {
+        method: "POST",
+        headers: { "Idempotency-Key": `dashboard:${id}` },
+      });
+      const body = (await response.json()) as { report?: StoredReport; error?: { message?: string } };
+      if (!response.ok || body.report === undefined) {
+        throw new Error(body.error?.message ?? "Casper publication queue is unavailable.");
+      }
+
+      setSelectedReport(body.report);
+      await refreshReports();
+      setStatus("Publication queued");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Casper publication queue is unavailable.");
+    } finally {
+      setIsPublishing(false);
     }
   }
 
@@ -263,6 +313,51 @@ export function SentinelConsole() {
           </section>
         </div>
 
+        <section className="panel" id="policy">
+          <div className="panelHeader">
+            <h2>Policy</h2>
+            <span>{policy.version}</span>
+          </div>
+          <div className="policyGrid">
+            <label>
+              Version
+              <input value={policy.version} onChange={(event) => setPolicy({ ...policy, version: event.target.value })} />
+            </label>
+            <label>
+              Warn score
+              <input value={policy.warnScore} onChange={(event) => setPolicy({ ...policy, warnScore: event.target.value })} />
+            </label>
+            <label>
+              Block score
+              <input value={policy.blockScore} onChange={(event) => setPolicy({ ...policy, blockScore: event.target.value })} />
+            </label>
+            <label>
+              High value motes
+              <input value={policy.highValueMotes} onChange={(event) => setPolicy({ ...policy, highValueMotes: event.target.value })} />
+            </label>
+            <label>
+              Block value motes
+              <input value={policy.blockValueMotes} onChange={(event) => setPolicy({ ...policy, blockValueMotes: event.target.value })} />
+            </label>
+            <label>
+              Max approval motes
+              <input value={policy.maxApprovalMotes} onChange={(event) => setPolicy({ ...policy, maxApprovalMotes: event.target.value })} />
+            </label>
+            <label>
+              Allowlist
+              <textarea value={policy.allowlistedTargets} onChange={(event) => setPolicy({ ...policy, allowlistedTargets: event.target.value })} />
+            </label>
+            <label>
+              Denylist
+              <textarea value={policy.denylistedTargets} onChange={(event) => setPolicy({ ...policy, denylistedTargets: event.target.value })} />
+            </label>
+            <label>
+              Denylisted wallets
+              <textarea value={policy.denylistedWallets} onChange={(event) => setPolicy({ ...policy, denylistedWallets: event.target.value })} />
+            </label>
+          </div>
+        </section>
+
         <section className="panel explanationPanel">
           <div className="panelHeader">
             <h2>Analyst Explanation</h2>
@@ -278,7 +373,7 @@ export function SentinelConsole() {
         <section className="panel" id="reports">
           <div className="panelHeader">
             <h2>Audit Trail</h2>
-            <span>{reports.length} reports</span>
+            <button type="button" className="secondaryButton" onClick={() => { void refreshReports(); }}>Refresh</button>
           </div>
           <div className="tableHeader" role="row">
             <span>Wallet</span>
@@ -305,18 +400,30 @@ export function SentinelConsole() {
             <span>{selectedReport?.id.slice(0, 8) ?? "None"}</span>
           </div>
           {selectedReport !== undefined ? (
-            <div className="detailGrid">
-              <Metric label="Decision" value={selectedReport.decision} />
-              <Metric label="Risk" value={selectedReport.riskScore.toString()} />
-              <Metric label="Policy" value={selectedReport.policyVersion} />
-              <Metric label="Casper" value={selectedReport.casperStatus} />
-              <Metric label="Casper tx" value={selectedReport.casperTransactionHash !== undefined ? shorten(selectedReport.casperTransactionHash) : "Pending"} />
-              <Metric label="Intent hash" value={shorten(selectedReport.intentHash)} />
-              <Metric label="Explanation" value={shorten(selectedReport.explanationHash)} />
-              {selectedReport.casperErrorMessage !== undefined ? (
-                <Metric label="Casper error" value={selectedReport.casperErrorMessage} />
-              ) : null}
-            </div>
+            <>
+              <div className="detailGrid">
+                <Metric label="Decision" value={selectedReport.decision} />
+                <Metric label="Risk" value={selectedReport.riskScore.toString()} />
+                <Metric label="Policy" value={selectedReport.policyVersion} />
+                <Metric label="Casper" value={selectedReport.casperStatus} />
+                <Metric label="Casper tx" value={selectedReport.casperTransactionHash !== undefined ? shorten(selectedReport.casperTransactionHash) : "Pending"} />
+                <Metric label="Intent hash" value={shorten(selectedReport.intentHash)} />
+                <Metric label="Explanation" value={shorten(selectedReport.explanationHash)} />
+                {selectedReport.casperErrorMessage !== undefined ? (
+                  <Metric label="Casper error" value={selectedReport.casperErrorMessage} />
+                ) : null}
+              </div>
+              <div className="detailActions">
+                <button
+                  type="button"
+                  className="secondaryButton"
+                  disabled={isPublishing || selectedReport.casperStatus === "confirmed"}
+                  onClick={() => { void retryPublication(selectedReport.id); }}
+                >
+                  {isPublishing ? "Queueing" : "Retry Publication"}
+                </button>
+              </div>
+            </>
           ) : (
             <div className="emptyRow">Select a report.</div>
           )}
@@ -362,6 +469,38 @@ function buildIntent(
   };
 }
 
+function buildPolicyPayload(policy: PolicySettings) {
+  return {
+    version: policy.version,
+    warnScore: parsePolicyInteger(policy.warnScore, 40),
+    blockScore: parsePolicyInteger(policy.blockScore, 80),
+    highValueMotes: policy.highValueMotes,
+    blockValueMotes: policy.blockValueMotes,
+    maxApprovalMotes: policy.maxApprovalMotes,
+    allowlistedTargets: parseList(policy.allowlistedTargets),
+    denylistedTargets: parseList(policy.denylistedTargets),
+    denylistedWallets: parseList(policy.denylistedWallets),
+    knownContracts: Object.fromEntries(
+      parseList(policy.allowlistedTargets).map((contractHash) => [
+        contractHash,
+        { verified: true, name: "Policy allowlisted contract" },
+      ]),
+    ),
+  };
+}
+
+function parsePolicyInteger(value: string, fallback: number): number {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) ? parsed : fallback;
+}
+
+function parseList(value: string): readonly string[] {
+  return value
+    .split(/[\n,]/u)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
 function Metric({ label, value }: Readonly<{ label: string; value: string }>) {
   return (
     <div className="metric">
@@ -392,10 +531,3 @@ function shorten(value: string): string {
   if (value.length <= 18) return value;
   return `${value.slice(0, 8)}...${value.slice(-6)}`;
 }
-
-
-
-
-
-
-

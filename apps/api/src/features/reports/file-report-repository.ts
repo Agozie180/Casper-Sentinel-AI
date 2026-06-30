@@ -93,6 +93,7 @@ function isStoredRiskReport(value: unknown): value is StoredRiskReport {
     typeof record.casperStatus === "string" &&
     (record.casperTransactionHash === undefined || typeof record.casperTransactionHash === "string") &&
     (record.casperErrorMessage === undefined || typeof record.casperErrorMessage === "string") &&
+    (record.casperPublicationIdempotencyKey === undefined || typeof record.casperPublicationIdempotencyKey === "string") &&
     Array.isArray(record.signals) &&
     Array.isArray(record.reasons) &&
     typeof record.requiredUserMessage === "string" &&
@@ -109,3 +110,4 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && "code" in error;
 }
+

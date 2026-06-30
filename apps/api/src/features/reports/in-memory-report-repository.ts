@@ -58,6 +58,8 @@ export function applyCasperPublicationUpdate(
     casperStatus: update.status,
     ...(update.transactionHash !== undefined ? { casperTransactionHash: update.transactionHash } : {}),
     ...(update.errorMessage !== undefined ? { casperErrorMessage: update.errorMessage } : {}),
+    ...(update.idempotencyKey !== undefined ? { casperPublicationIdempotencyKey: update.idempotencyKey } : {}),
     updatedAt: update.updatedAt,
   };
 }
+
