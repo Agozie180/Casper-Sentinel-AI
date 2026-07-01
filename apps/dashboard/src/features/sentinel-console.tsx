@@ -250,6 +250,32 @@ export function SentinelConsole() {
       window.removeEventListener("casper-wallet:activeKeyChanged", handleActiveKeyChanged);
   }, []);
 
+  // Reflect an already-authorized wallet on load. This only ever *reads* real
+  // provider state — if the extension is absent, locked, or not connected, the
+  // UI stays in the default "Connect Wallet" state and never fakes a session.
+  useEffect(() => {
+    let cancelled = false;
+    async function syncExistingConnection() {
+      const providerFactory = window.CasperWalletProvider;
+      if (typeof providerFactory !== "function") return;
+      try {
+        const provider = providerFactory();
+        if (!(await provider.isConnected())) return;
+        const publicKey = await provider.getActivePublicKey();
+        if (cancelled || typeof publicKey !== "string" || publicKey.length === 0) return;
+        setConnectedWallet(publicKey);
+        setWalletAddress(publicKey);
+      } catch {
+        // Extension locked or unavailable: keep the default disconnected state.
+      }
+    }
+
+    void syncExistingConnection();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const intentPreview = useMemo(
     () => buildIntent(mode, activeWallet, target, amountMotes, entryPoint),
     [activeWallet, amountMotes, entryPoint, mode, target],
@@ -449,7 +475,7 @@ export function SentinelConsole() {
           </div>
           <div>
             <strong>Casper Sentinel AI</strong>
-            <span>Agent transaction security</span>
+            <span>Pre-signature transaction security</span>
           </div>
         </div>
         <nav className="sideNav">
@@ -478,8 +504,12 @@ export function SentinelConsole() {
             </p>
           </div>
           <div className="heroActions">
-            <span className={`statusPill ${apiState}`}>API {apiState}</span>
-            <span className={`statusPill ${scoreTone}`}>{status}</span>
+            <span className={`statusPill ${apiState}`} aria-live="polite">
+              API {apiState}
+            </span>
+            <span className={`statusPill ${scoreTone}`} role="status" aria-live="polite">
+              {status}
+            </span>
             <ThemeToggle />
             {connectedWallet !== undefined ? (
               <span className="walletCluster">
@@ -510,7 +540,11 @@ export function SentinelConsole() {
           </div>
         </header>
 
-        {error !== undefined ? <div className="alert">{error}</div> : null}
+        {error !== undefined ? (
+          <div className="alert" role="alert">
+            {error}
+          </div>
+        ) : null}
 
         <section className="metricStrip" aria-label="Security operations snapshot">
           <Metric label="Peak risk" value={highestRisk.toString()} accent="danger" />
@@ -540,6 +574,10 @@ export function SentinelConsole() {
                   <input
                     value={walletAddress}
                     onChange={(event) => setWalletAddress(event.target.value)}
+                    spellCheck={false}
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    autoCorrect="off"
                   />
                 </label>
                 <label>
@@ -547,18 +585,32 @@ export function SentinelConsole() {
                   <input
                     value={entryPoint}
                     onChange={(event) => setEntryPoint(event.target.value)}
+                    spellCheck={false}
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    autoCorrect="off"
                   />
                 </label>
               </div>
               <label>
                 Target contract / account
-                <input value={target} onChange={(event) => setTarget(event.target.value)} />
+                <input
+                  value={target}
+                  onChange={(event) => setTarget(event.target.value)}
+                  spellCheck={false}
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                />
               </label>
               <label>
                 Amount in motes
                 <input
                   value={amountMotes}
                   onChange={(event) => setAmountMotes(event.target.value)}
+                  inputMode="numeric"
+                  spellCheck={false}
+                  autoComplete="off"
                 />
               </label>
               <div className="scenarioRail" role="group" aria-label="Scenario">
@@ -567,6 +619,7 @@ export function SentinelConsole() {
                     key={item}
                     type="button"
                     className={mode === item ? "active" : ""}
+                    aria-pressed={mode === item}
                     onClick={() => applyMode(item)}
                   >
                     <span>{item}</span>
@@ -588,6 +641,7 @@ export function SentinelConsole() {
           <section
             className={`panel decisionPanel ${scoreTone} ${isLoading ? "isBusy" : ""}`}
             aria-label="Decision state"
+            aria-busy={isLoading}
           >
             <div className="panelHeader">
               <div>
@@ -786,6 +840,7 @@ export function SentinelConsole() {
                       key={report.id}
                       type="button"
                       className="reportRow"
+                      aria-label={`Open report for ${shorten(report.walletAddress)}, risk ${report.riskScore}, decision ${report.decision}`}
                       onClick={() => {
                         void loadReport(report.id);
                       }}

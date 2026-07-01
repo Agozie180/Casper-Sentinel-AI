@@ -1,12 +1,43 @@
 # Casper Sentinel AI
 
-> The Autonomous Security Layer for AI Agents.
+> Autonomous security layer for AI agents and Casper transactions.
 
 Casper Sentinel AI is an autonomous pre-execution security agent for Casper transactions. Before a
 wallet or AI agent signs a transaction, Sentinel evaluates the intent, contract risk, wallet
 behavior, policy fit, and suspicious indicators, then returns an explainable `APPROVE`, `WARN`, or
 `BLOCK` decision. Each decision is designed to be recorded on Casper Testnet as a transparent
 security report.
+
+## Evaluate in 5 minutes
+
+**What it is** — A security checkpoint that screens a Casper transaction *before* it is signed, and
+returns a deterministic `APPROVE` / `WARN` / `BLOCK` decision with an evidence-backed explanation.
+
+**Why it matters** — AI agents now sign and call contracts faster than any human can review them. A
+wallet prompt assumes a person is watching; agents break that assumption. Sentinel restores a
+reviewable control point between intent and signature.
+
+**What makes it agentic** — Sentinel acts on unsigned intent on its own: it runs a detector stack,
+scores risk, and decides the outcome without a human in the loop. The AI writes the human-readable
+rationale (observed evidence vs. inferred risk); it can *explain* the decision but can never change
+it — the verdict is deterministic policy.
+
+**What runs on Casper** — A Rust `risk-report-registry` contract, **live and verified on Casper
+Testnet**, stores compact risk-report attestations (`record_report` / `get_report`).
+Contract `hash-f8843bf7…46a0eda0` · [view the install deploy on cspr.live](https://testnet.cspr.live/deploy/0a4dc7c4d7cc7ac042b014ed9be206b83fc2f5f8cbc2a09a336f8ecea04a90e7).
+
+**Test it now (no install)**
+
+1. Open the live console → https://casper-sentineldashboard-production.up.railway.app/app
+2. Pick the **Safe**, **Warning**, or **Block** scenario and press **Analyze intent**.
+3. Read the decision, risk dial, detector signals, and the evidence-vs-inference explanation.
+4. Open a row in **Recent analyses** to inspect the Casper attestation packet.
+5. Toggle the theme (top right) — Professional Dark / Light, persisted across reloads.
+
+> If the API is unreachable, **Load demo case** shows a full local example. The demo never claims a
+> Casper transaction hash — no blockchain interaction is ever faked.
+
+Deep detail (architecture, API, contract, phase log) follows below.
 
 ## MVP Scope
 
@@ -25,7 +56,7 @@ security report.
 | --- | --- | --- |
 | Monorepo | pnpm workspaces + Turborepo | Fast TypeScript workspace with clear package boundaries. |
 | Web dashboard | Next.js + React + TypeScript | Production-grade full-stack UI with server components and API routes when useful. |
-| Styling | Tailwind CSS + shared UI tokens | Premium dark security UI without crypto-casino styling. |
+| Styling | CSS design tokens (two-theme system) | Premium security UI (Professional Dark / Light) without crypto-casino styling; themed via CSS variables on `[data-theme]`. |
 | API service | Fastify + TypeScript | Small, fast, typed HTTP boundary for screening, audits, and Casper adapters. |
 | Domain packages | TypeScript packages | Shared strict models, risk engine, policies, and utilities across API and dashboard. |
 | Validation | Zod | Runtime input validation at public boundaries. |
@@ -230,10 +261,10 @@ Use the demo script to capture the landing page, `SAFE`, `WARNING`, `BLOCK`, loc
 - [x] Uses Casper Testnet.
 - [x] Includes a Casper smart contract.
 - [x] Stores verifiable risk report data or references on-chain.
-- [ ] Provides an autonomous agent workflow.
+- [x] Provides an autonomous agent workflow (screens unsigned intent and decides pre-signature, no human in the loop).
 - [x] Includes wallet connection.
-- [ ] Demonstrates transaction analysis before execution.
-- [ ] Shows transparent dashboard audit history.
+- [x] Demonstrates transaction analysis before execution.
+- [x] Shows transparent dashboard audit history.
 - [x] Includes complete README, architecture, and roadmap.
 
 ## Development Status
@@ -316,7 +347,7 @@ Hackathon polish completed:
 
 - Command-center dashboard redesign with stronger first impression, responsive layouts, and judge-safe local demo mode.
 - Clearer AI reasoning, detector stack, audit trail, and attestation packet presentation.
-- Local contract Wasm build verified for `wasm32-unknown-unknown`.
+- Local contract Wasm build verified for the `wasm32v1-none` Casper target.
 - Guarded Casper Testnet deployment script added under `scripts/deploy-casper-testnet.ps1`, with native/WSL client support.
 
 Next work: provide a funded Testnet key path, deploy the contract to Testnet, then publish one real queued report and record the transaction evidence.
