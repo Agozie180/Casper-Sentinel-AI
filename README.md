@@ -148,7 +148,7 @@ can explain the decision, but it cannot change `APPROVE`, `WARN`, or `BLOCK`.
 
 ## Dashboard Workflow
 
-The dashboard is a judge-ready security command center. It lets a user enter a wallet address,
+The dashboard now opens with a professional product landing page explaining what Sentinel is, why it matters, how it works, and FAQ. The launched console is a judge-ready security command center that lets a user enter a wallet address,
 prepare safe, warning, or blocking transaction intents, submit analysis to the API, inspect the
 analyst explanation, open saved report detail from the audit trail, and use a clearly labeled local
 judge demo when the API is unavailable. The local demo never claims a Casper transaction hash.
@@ -193,7 +193,7 @@ The script refuses to deploy without a Casper client, the Wasm artifact, and a r
 
 ## Screenshots
 
-Use the demo script to capture the dashboard states for `SAFE`, `WARNING`, `BLOCK`, local judge demo, and publication retry flows after starting the local API and dashboard.
+Use the demo script to capture the landing page, `SAFE`, `WARNING`, `BLOCK`, local judge demo, and publication retry flows after starting the local API and dashboard.
 
 ## Demo Flow
 

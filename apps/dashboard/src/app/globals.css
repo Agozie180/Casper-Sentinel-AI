@@ -189,7 +189,7 @@ nav a:hover {
 .eyebrow {
   color: var(--secure);
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -253,8 +253,8 @@ p {
 
 h1 {
   margin-top: 8px;
-  font-size: clamp(2.4rem, 4vw, 4.8rem);
-  line-height: 0.96;
+  font-size: clamp(1.9rem, 3vw, 3.2rem);
+  line-height: 1.02;
 }
 
 h2 {
@@ -396,7 +396,7 @@ h3 {
 
 .scenarioRail button span {
   color: var(--text);
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -438,13 +438,13 @@ h3 {
 
 .decisionBadge span {
   overflow-wrap: anywhere;
-  font-size: clamp(1.8rem, 4vw, 3.4rem);
-  font-weight: 900;
+  font-size: clamp(1.35rem, 2.6vw, 2.2rem);
+  font-weight: 600;
   line-height: 0.95;
 }
 
 .decisionBadge strong {
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(2rem, 4vw, 3.35rem);
   line-height: 0.85;
 }
 
@@ -538,7 +538,7 @@ h3 {
 
 .signalItem b {
   color: var(--warning);
-  font-size: 2rem;
+  font-size: 1.35rem;
   line-height: 1;
 }
 
@@ -681,5 +681,261 @@ h3 {
 
   .reportRow {
     gap: 5px;
+  }
+}
+
+.landingShell {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(96, 165, 250, 0.1), transparent 360px),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.05), rgba(167, 139, 250, 0.04)),
+    var(--background);
+  color: var(--text);
+}
+
+.landingNav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid rgba(38, 50, 68, 0.82);
+  background: rgba(6, 8, 12, 0.86);
+  padding: 18px clamp(20px, 5vw, 72px);
+  backdrop-filter: blur(18px);
+}
+
+.landingBrand,
+.landingNav div,
+.landingActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landingBrand,
+.landingNav a {
+  color: var(--muted-strong);
+  text-decoration: none;
+}
+
+.landingBrand {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.landingBrand span {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--secure);
+  border-top-width: 6px;
+  border-radius: 12px 12px 7px 7px;
+}
+
+.landingNav div a {
+  border-radius: 8px;
+  padding: 9px 10px;
+}
+
+.navLaunch,
+.primaryLaunch,
+.secondaryLaunch {
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 11px 15px;
+}
+
+.navLaunch,
+.primaryLaunch {
+  border-color: rgba(45, 212, 191, 0.56);
+  background: #0f766e;
+  color: white !important;
+}
+
+.secondaryLaunch {
+  background: rgba(10, 16, 24, 0.72);
+  color: var(--text) !important;
+}
+
+.landingHero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: min(760px, calc(100vh - 70px));
+  align-items: center;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  padding: clamp(64px, 10vw, 118px) clamp(20px, 5vw, 72px);
+}
+
+.landingHero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  content: "";
+  background:
+    linear-gradient(90deg, rgba(6, 8, 12, 0.98) 0%, rgba(6, 8, 12, 0.82) 46%, rgba(6, 8, 12, 0.42) 100%),
+    linear-gradient(135deg, rgba(45, 212, 191, 0.16), rgba(96, 165, 250, 0.1) 42%, rgba(167, 139, 250, 0.08));
+}
+
+.landingHeroCopy {
+  max-width: 760px;
+  z-index: 1;
+}
+
+.landingEyebrow {
+  color: var(--secure);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.landingHero h1 {
+  margin: 12px 0 18px;
+  max-width: 760px;
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: 600;
+  line-height: 0.98;
+}
+
+.landingHeroCopy > p:last-of-type,
+.sectionIntro p,
+.capabilityGrid p,
+.faqGrid p {
+  color: #d5deec;
+  line-height: 1.65;
+}
+
+.landingHeroCopy > p:last-of-type {
+  max-width: 690px;
+  font-size: clamp(1rem, 2vw, 1.22rem);
+}
+
+.landingActions {
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+
+.heroPreviewImage {
+  position: absolute;
+  right: clamp(20px, 5vw, 72px);
+  bottom: clamp(34px, 6vw, 80px);
+  z-index: -1;
+  width: min(620px, 50vw);
+  max-height: 72%;
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  border-radius: 8px;
+  object-fit: cover;
+  opacity: 0.8;
+  box-shadow: 0 34px 100px rgba(0, 0, 0, 0.42);
+}
+
+.proofStrip strong,
+.workflowRail strong,
+.capabilityGrid h3,
+.faqGrid h3 {
+  font-weight: 600;
+}
+
+.proofStrip,
+.landingSection,
+.landingCta {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.proofStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 28px 0 12px;
+}
+
+.landingSection {
+  padding: clamp(56px, 8vw, 92px) 0;
+}
+
+.sectionIntro {
+  max-width: 760px;
+  margin-bottom: 24px;
+}
+
+.sectionIntro h2,
+.landingCta h2 {
+  margin: 8px 0 10px;
+  font-size: clamp(1.55rem, 3vw, 2.7rem);
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.capabilityGrid,
+.faqGrid,
+.workflowRail {
+  display: grid;
+  gap: 14px;
+}
+
+.capabilityGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.workflowRail {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.workflowRail span {
+  color: var(--secure);
+}
+
+.faqGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.landingCta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 52px;
+  background:
+    linear-gradient(120deg, rgba(45, 212, 191, 0.11), rgba(96, 165, 250, 0.08)),
+    rgba(16, 23, 34, 0.82);
+}
+
+@media (max-width: 900px) {
+  .landingNav,
+  .landingNav div,
+  .landingCta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .landingNav div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .heroPreviewImage {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    width: 100%;
+    max-height: none;
+    margin-top: 36px;
+    opacity: 0.7;
+  }
+
+  .landingHero {
+    min-height: auto;
+  }
+
+  .proofStrip,
+  .capabilityGrid,
+  .workflowRail,
+  .faqGrid {
+    grid-template-columns: 1fr;
   }
 }
