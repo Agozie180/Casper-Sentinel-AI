@@ -220,13 +220,30 @@ Exit criteria:
 - Stretch features have documented interfaces and do not require rewriting the MVP core.
 - MVP phase roadmap is complete; future work should select a live extension or Casper deployment task.
 
+## Phase 9 - Live Casper Testnet Readiness
 
+Status: complete.
 
+Objective: make the Casper publication boundary ready for a real Testnet transaction without fabricating signer output, transaction hashes, or confirmations.
 
+Tasks:
 
+- Add a JSON-RPC Casper gateway that submits signer-produced payloads through `account_put_transaction`.
+- Keep legacy `account_put_deploy` compatibility behind an explicit mode.
+- Add confirmation polling that returns confirmed only from execution-result status data.
+- Add live readiness validation for RPC URL, SSE URL, contract hash, and publisher public key.
+- Document the Testnet runbook, current limitations, and exact conditions required before claiming a live transaction.
 
+Tests:
 
+- JSON-RPC request-shape tests.
+- Transaction hash extraction tests.
+- Pending versus confirmed polling tests.
+- Readiness validation tests.
 
+Exit criteria:
 
+- The worker can be wired to a real Casper gateway once a secure signer and deployed contract hash are supplied.
+- The repo documents that no live Testnet transaction is claimed until JSON-RPC returns a hash and polling returns execution result data.
 
-
+Next work: implement the secure signer and Casper Wasm runtime wrapper, deploy to Testnet, then submit one real report attestation.

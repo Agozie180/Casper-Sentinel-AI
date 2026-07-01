@@ -283,6 +283,7 @@ contract_registry
 - Portfolio monitoring can reuse wallet context and detectors on scheduled jobs.
 - Enterprise dashboard can add tenancy, RBAC, and policy versions.
 - Browser extension can call the same `AnalyzeTransaction` API.
+- Live Casper publication can swap signer implementations behind `SignedCasperTransactionFactory` without changing report storage or dashboard status handling.
 
 ## Source Notes
 
@@ -290,6 +291,3 @@ Casper is a smart-contracting platform backed by Proof-of-Stake and WebAssembly.
 docs list Rust crates including `casper-contract`, `casper-types`, `casper-client`,
 `casper-event-standard`, and `cargo-casper`, and document JSON-RPC plus SSE event monitoring for
 dApps. The contract and chain adapters should follow those official interfaces.
-
-
-

@@ -70,7 +70,7 @@ Sentinel follows clean architecture with feature-first application modules:
 - Contracts: Casper Rust/Wasm contract storing risk report attestations.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md), [ROADMAP.md](./ROADMAP.md), and
-[docs/decisions/0001-architecture-stack.md](./docs/decisions/0001-architecture-stack.md), [docs/threat-model.md](./docs/threat-model.md), [docs/demo-script.md](./docs/demo-script.md), and [docs/extension-readiness.md](./docs/extension-readiness.md).
+[docs/decisions/0001-architecture-stack.md](./docs/decisions/0001-architecture-stack.md), [docs/threat-model.md](./docs/threat-model.md), [docs/demo-script.md](./docs/demo-script.md), [docs/extension-readiness.md](./docs/extension-readiness.md), and [docs/casper-testnet-runbook.md](./docs/casper-testnet-runbook.md).
 
 ## Installation
 
@@ -163,15 +163,15 @@ The dashboard expects the API at `http://localhost:4000` unless `NEXT_PUBLIC_API
 
 ## Deployment
 
-Deployment is not wired yet. The intended MVP deployment shape is:
+Deployment hosting is not wired yet. The intended MVP deployment shape is:
 
 - Dashboard on a Node-compatible web host.
 - API and worker as separate server processes.
 - PostgreSQL and Redis as managed services.
 - Casper Testnet contract deployed from `contracts/risk-report-registry` once runtime bindings are implemented.
+- Worker configured with `JsonRpcCasperDeployGateway` and a secure signer implementation for live report publication.
 
-No deployment command should claim success until all infrastructure and Casper transactions are
-confirmed.
+No deployment command should claim success until all infrastructure and Casper transactions are confirmed. Phase 9 adds JSON-RPC submission and confirmation polling boundaries, but the repo still does not include a private-key signer or a committed live Testnet transaction hash.
 
 ## Screenshots
 
@@ -201,7 +201,7 @@ Use the demo script to capture the dashboard states for `SAFE`, `WARNING`, `BLOC
 
 ## Development Status
 
-Current phase: **MVP foundation complete - extension implementation backlog**.
+Current phase: **Phase 9 complete - live Casper Testnet readiness, signer/deployment still external**.
 
 Phase 1 completed:
 
@@ -267,21 +267,18 @@ Phase 8 completed:
 - RBAC helper for tenant-scoped permission checks.
 - Extension readiness document describing contracts, invariants, and future implementation path.
 
-Next work: choose one live extension or Casper Testnet deployment task and implement it behind the established interfaces.
+Phase 9 completed:
+
+- Live Casper JSON-RPC gateway for submitting already-signed `record_report` transactions.
+- Default `account_put_transaction` support with legacy `account_put_deploy` compatibility mode.
+- Explicit confirmation polling that only confirms after execution result data appears.
+- Live readiness validation for RPC, SSE, contract hash, and publisher public key configuration.
+- Casper Testnet publication runbook that separates readiness from an actual submitted transaction.
+
+Next work: implement the secure signer and Casper Wasm runtime wrapper, deploy the contract to Testnet, then publish one real queued report and record the transaction evidence.
 
 ## References
 
 - [Casper official developer docs](https://docs.casper.network/developers)
 - [Casper official Rust crates](https://docs.casper.network/developers/essential-crates)
 - [Casper event monitoring docs](https://docs.casper.network/developers/monitor-and-consume-events)
-
-
-
-
-
-
-
-
-
-
-
