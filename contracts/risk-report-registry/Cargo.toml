@@ -9,3 +9,8 @@ description = "Casper Sentinel AI risk report registry contract domain."
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+casper-contract = { version = "5.1.1", default-features = false }
+casper-types = "6.1.0"
+wee_alloc = "0.4.5"

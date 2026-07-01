@@ -10,10 +10,10 @@ param(
   [string]$ChainName = "casper-test",
 
   [ValidateNotNullOrEmpty()]
-  [string]$WasmPath = "target/wasm32-unknown-unknown/release/risk_report_registry.wasm",
+  [string]$WasmPath = "target/wasm32v1-none/release/risk_report_registry.wasm",
 
   [ValidateRange(1, [long]::MaxValue)]
-  [long]$PaymentAmount = 30000000000,
+  [long]$PaymentAmount = 200000000000,
 
   [ValidateNotNullOrEmpty()]
   [string]$WslDistribution = "Ubuntu"
@@ -45,11 +45,19 @@ function Convert-ToWslPath {
     [Parameter(Mandatory = $true)][string]$WindowsPath
   )
 
-  $converted = & wsl.exe -d $Distribution -- wslpath -a $WindowsPath
-  if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($converted)) {
-    throw "Could not convert Windows path for WSL: $WindowsPath"
+  $resolvedPath = Resolve-Path -LiteralPath $WindowsPath -ErrorAction SilentlyContinue
+  if ($null -eq $resolvedPath) {
+    throw "Could not resolve Windows path for WSL: $WindowsPath"
   }
-  return $converted.Trim()
+
+  $path = $resolvedPath.Path
+  if ($path -notmatch "^[A-Za-z]:\\") {
+    throw "Only drive-letter Windows paths can be converted for WSL: $path"
+  }
+
+  $drive = $path.Substring(0, 1).ToLowerInvariant()
+  $pathWithoutDrive = $path.Substring(2).Replace("\", "/")
+  return "/mnt/$drive$pathWithoutDrive"
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
@@ -66,9 +74,15 @@ if ($null -eq $resolvedWasmPath) {
   Write-Host "Building contract Wasm artifact..."
   Push-Location $repoRoot
   try {
-    cargo build -p risk-report-registry --target wasm32-unknown-unknown --release
+    $previousRustcBootstrap = $env:RUSTC_BOOTSTRAP
+    $previousRustflags = $env:RUSTFLAGS
+    $env:RUSTC_BOOTSTRAP = "1"
+    $env:RUSTFLAGS = "-C link-arg=--allow-undefined"
+    cargo build -p risk-report-registry --target wasm32v1-none --release
   }
   finally {
+    $env:RUSTC_BOOTSTRAP = $previousRustcBootstrap
+    $env:RUSTFLAGS = $previousRustflags
     Pop-Location
   }
   $resolvedWasmPath = Resolve-Path -Path (Join-Path $repoRoot $WasmPath)
@@ -92,7 +106,12 @@ Write-Host "Client: $(if ($useWslCasperClient) { "WSL $WslDistribution" } else {
 if ($useWslCasperClient) {
   $wslWasmPath = Convert-ToWslPath -Distribution $WslDistribution -WindowsPath $resolvedWasmPath.Path
   $wslSecretKeyPath = Convert-ToWslPath -Distribution $WslDistribution -WindowsPath $resolvedSecretKeyPath.Path
-  & wsl.exe -d $WslDistribution -- casper-client put-deploy `
+  $wslCasperClient = (& wsl.exe -d $WslDistribution -- bash -lc "command -v casper-client").Trim()
+  if ([string]::IsNullOrWhiteSpace($wslCasperClient)) {
+    throw "casper-client was found during readiness checks but could not be resolved for deployment."
+  }
+
+  & wsl.exe -d $WslDistribution -- $wslCasperClient put-deploy `
     --node-address $NodeAddress `
     --chain-name $ChainName `
     --secret-key $wslSecretKeyPath `
