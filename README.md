@@ -70,7 +70,7 @@ Sentinel follows clean architecture with feature-first application modules:
 - Contracts: Casper Rust/Wasm contract storing risk report attestations.
 
 See [ARCHITECTURE.md](./ARCHITECTURE.md), [ROADMAP.md](./ROADMAP.md), and
-[docs/decisions/0001-architecture-stack.md](./docs/decisions/0001-architecture-stack.md), [docs/threat-model.md](./docs/threat-model.md), and [docs/demo-script.md](./docs/demo-script.md).
+[docs/decisions/0001-architecture-stack.md](./docs/decisions/0001-architecture-stack.md), [docs/threat-model.md](./docs/threat-model.md), [docs/demo-script.md](./docs/demo-script.md), and [docs/extension-readiness.md](./docs/extension-readiness.md).
 
 ## Installation
 
@@ -201,7 +201,7 @@ Use the demo script to capture the dashboard states for `SAFE`, `WARNING`, `BLOC
 
 ## Development Status
 
-Current phase: **Phase 8 - Post-MVP Extension Readiness**.
+Current phase: **MVP foundation complete - extension implementation backlog**.
 
 Phase 1 completed:
 
@@ -260,13 +260,21 @@ Phase 7 completed:
 - Demo script for safe, warning, blocking, and publication retry flows.
 - Responsive policy/detail layout refinements for mobile and desktop review.
 
-Next phase: define post-MVP extension interfaces for MCP, x402, multi-agent orchestration, monitoring, and enterprise tenancy.
+Phase 8 completed:
+
+- `@casper-sentinel/extensions` package with MCP, x402, agent orchestration, monitoring, and tenant/RBAC interfaces.
+- Manifest validation helpers for extension IDs, permissions, required secrets, and monitoring schedule safety.
+- RBAC helper for tenant-scoped permission checks.
+- Extension readiness document describing contracts, invariants, and future implementation path.
+
+Next work: choose one live extension or Casper Testnet deployment task and implement it behind the established interfaces.
 
 ## References
 
 - [Casper official developer docs](https://docs.casper.network/developers)
 - [Casper official Rust crates](https://docs.casper.network/developers/essential-crates)
 - [Casper event monitoring docs](https://docs.casper.network/developers/monitor-and-consume-events)
+
 
 
 
