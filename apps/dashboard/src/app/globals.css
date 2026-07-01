@@ -353,7 +353,7 @@ textarea:focus {
    ========================================================================= */
 .shell {
   display: grid;
-  grid-template-columns: 268px minmax(0, 1fr);
+  grid-template-columns: 252px minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -365,14 +365,14 @@ textarea:focus {
   flex-direction: column;
   border-right: 1px solid var(--line-soft);
   background: var(--sidebar);
-  padding: 22px;
+  padding: 20px 18px;
 }
 
 .brand {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 26px;
+  margin-bottom: 22px;
 }
 
 .brandMark {
@@ -448,7 +448,7 @@ textarea:focus {
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
   background: var(--surface-control);
-  padding: 15px;
+  padding: 14px;
 }
 
 .sideModule > span {
@@ -468,9 +468,9 @@ textarea:focus {
 
 .workspace {
   display: grid;
-  gap: 18px;
+  gap: 16px;
   align-content: start;
-  padding: 24px clamp(16px, 3vw, 30px);
+  padding: 22px clamp(16px, 3vw, 28px);
 }
 
 .heroBar,
@@ -669,12 +669,12 @@ textarea:focus {
   overflow: hidden;
   display: grid;
   gap: 5px;
-  min-height: 78px;
+  min-height: 72px;
   min-width: 0;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
   background: var(--surface);
-  padding: 14px 15px;
+  padding: 13px 14px;
 }
 
 .metric span {
@@ -711,7 +711,7 @@ textarea:focus {
 .metric strong {
   min-width: 0;
   overflow-wrap: anywhere;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
@@ -741,12 +741,12 @@ textarea:focus {
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
   background: var(--surface);
-  padding: 20px;
+  padding: 18px;
   box-shadow: var(--shadow-soft);
 }
 
 .panelHeader {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   align-items: flex-start;
 }
 
@@ -983,7 +983,7 @@ textarea:focus {
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-sm);
   background: var(--surface-control);
-  padding: 15px;
+  padding: 14px;
 }
 
 .evidenceList h3 {
@@ -1085,17 +1085,17 @@ textarea:focus {
 
 .reportList {
   display: grid;
-  gap: 2px;
-  margin-top: 4px;
+  gap: 3px;
+  margin-top: 6px;
 }
 
 .reportRow {
-  min-height: 48px;
+  min-height: 46px;
   width: 100%;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text);
-  padding: 8px 10px;
+  padding: 9px 12px;
   text-align: left;
 }
 
@@ -1266,7 +1266,7 @@ textarea:focus {
 .landingBrand {
   color: var(--text);
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .landingNav > div a:not(.navLaunch) {
@@ -1291,7 +1291,7 @@ textarea:focus {
   gap: clamp(28px, 5vw, 64px);
   align-items: center;
   border-bottom: 1px solid var(--line-soft);
-  padding: clamp(48px, 7vw, 92px) clamp(20px, 5vw, 76px);
+  padding: clamp(44px, 6vw, 80px) clamp(20px, 5vw, 76px);
 }
 
 .landingHeroCopy {
@@ -1300,23 +1300,23 @@ textarea:focus {
 
 .landingHero h1 {
   margin: 14px 0 18px;
-  max-width: 720px;
-  font-size: clamp(2.3rem, 5vw, 4rem);
-  font-weight: 600;
-  line-height: 1.03;
-  letter-spacing: -0.025em;
+  max-width: 700px;
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.022em;
 }
 
 .landingHeroCopy > p:last-of-type {
-  max-width: 620px;
+  max-width: 600px;
   color: var(--text-soft);
-  font-size: clamp(1rem, 1.4vw, 1.15rem);
-  line-height: 1.62;
+  font-size: clamp(0.96rem, 1.2vw, 1.05rem);
+  line-height: 1.6;
 }
 
 .landingActions {
   flex-wrap: wrap;
-  margin-top: 28px;
+  margin-top: 24px;
 }
 
 .primaryLaunch,
@@ -1390,14 +1390,14 @@ textarea:focus {
 
 .heroDecision strong {
   color: var(--danger);
-  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-size: clamp(1.35rem, 2.6vw, 1.85rem);
   font-weight: 600;
   line-height: 1;
 }
 
 .heroDecision b {
   color: var(--danger);
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 0.9;
@@ -1417,7 +1417,7 @@ textarea:focus {
   border: 1px solid var(--line-soft);
   border-radius: var(--radius-sm);
   background: var(--surface-control);
-  padding: 16px;
+  padding: 14px;
 }
 
 .heroSignalGrid div {
@@ -1472,48 +1472,49 @@ textarea:focus {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  padding: 30px 0 4px;
+  padding: 26px 0 4px;
 }
 
 .proofStrip div {
-  min-height: 96px;
+  min-height: 84px;
 }
 
 .proofStrip span,
 .workflowRail span {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
 }
 
 .proofStrip strong,
 .workflowRail strong {
-  font-size: 0.98rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 .landingSection {
-  padding: clamp(52px, 7vw, 88px) 0;
+  padding: clamp(44px, 6vw, 76px) 0;
 }
 
 .sectionIntro {
-  max-width: 720px;
-  margin-bottom: 26px;
+  max-width: 700px;
+  margin-bottom: 24px;
 }
 
 .sectionIntro h2,
 .landingCta h2 {
   margin: 8px 0 10px;
-  font-size: clamp(1.5rem, 2.8vw, 2.3rem);
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.35rem, 2.4vw, 1.95rem);
+  font-weight: 500;
+  line-height: 1.16;
+  letter-spacing: -0.018em;
 }
 
 .sectionIntro p,
 .capabilityGrid p,
 .faqGrid p {
   color: var(--text-soft);
-  line-height: 1.62;
+  font-size: 0.94rem;
+  line-height: 1.6;
 }
 
 .capabilityGrid,
@@ -1545,7 +1546,7 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 48px;
+  margin-bottom: 42px;
   background:
     radial-gradient(
       600px 200px at 0% 0%,
@@ -1654,7 +1655,7 @@ textarea:focus {
   }
 
   .landingHero h1 {
-    font-size: clamp(2rem, 10vw, 2.8rem);
+    font-size: clamp(1.8rem, 9vw, 2.5rem);
   }
 }
 
