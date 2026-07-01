@@ -334,10 +334,10 @@ export function SentinelConsole() {
           <div className="brandMark" aria-hidden="true"><span /></div>
           <div>
             <strong>Casper Sentinel AI</strong>
-            <span>Autonomous transaction defense</span>
+            <span>Agent transaction security</span>
           </div>
         </div>
-        <nav>
+        <nav className="sideNav">
           {navigationItems.map((item) => (
             <a key={item} href={`#${item.toLowerCase()}`}>
               {item}
@@ -345,20 +345,19 @@ export function SentinelConsole() {
           ))}
         </nav>
         <div className="sideModule">
-          <span>Testnet readiness</span>
-          <strong>{confirmedCount > 0 ? "Evidence live" : "Signer required"}</strong>
-          <p>Sentinel will not display an on-chain hash until Casper RPC returns one.</p>
+          <span>Evidence readiness</span>
+          <strong>{confirmedCount > 0 ? "Evidence live" : "Awaiting signer"}</strong>
+          <p>Confirmed evidence appears only after Casper RPC returns a real transaction hash.</p>
         </div>
       </aside>
 
       <section className="workspace" aria-label="Security workspace">
         <header className="heroBar">
           <div className="heroCopy">
-            <p className="eyebrow">Pre-signature AI security layer</p>
+            <p className="eyebrow">Security operations console</p>
             <h1>Casper Sentinel AI</h1>
             <p>
-              A command center that intercepts transaction intent, runs deterministic security policy, explains the risk,
-              and prepares verifiable Casper attestations before a user signs.
+              Review unsigned Casper intent, enforce deterministic policy, and prepare evidence packets before an agent or user can sign.
             </p>
           </div>
           <div className="heroActions">
@@ -370,9 +369,9 @@ export function SentinelConsole() {
 
         {error !== undefined ? <div className="alert">{error}</div> : null}
 
-        <section className="metricStrip" aria-label="Operational snapshot">
-          <Metric label="Highest risk" value={highestRisk.toString()} accent="danger" />
-          <Metric label="Reports" value={displayedReports.length.toString()} accent="info" />
+        <section className="metricStrip" aria-label="Security operations snapshot">
+          <Metric label="Peak risk" value={highestRisk.toString()} accent="danger" />
+          <Metric label="Reviewed" value={displayedReports.length.toString()} accent="info" />
           <Metric label="Queued" value={queuedCount.toString()} accent="warning" />
           <Metric label="Confirmed" value={confirmedCount.toString()} accent="secure" />
         </section>
@@ -381,8 +380,8 @@ export function SentinelConsole() {
           <section className="panel intentPanel" id="analyze">
             <div className="panelHeader">
               <div>
-                <p className="sectionKicker">Transaction intent</p>
-                <h2>Intercept before signature</h2>
+                <p className="sectionKicker">Unsigned intent</p>
+                <h2>Screen the request</h2>
               </div>
               <span>{shorten(activeWallet)}</span>
             </div>
@@ -398,11 +397,11 @@ export function SentinelConsole() {
                 </label>
               </div>
               <label>
-                Target contract or account
+                Target contract / account
                 <input value={target} onChange={(event) => setTarget(event.target.value)} />
               </label>
               <label>
-                Amount motes
+                Amount in motes
                 <input value={amountMotes} onChange={(event) => setAmountMotes(event.target.value)} />
               </label>
               <div className="scenarioRail" role="group" aria-label="Scenario">
@@ -419,8 +418,8 @@ export function SentinelConsole() {
                 ))}
               </div>
               <div className="actionRow">
-                <button type="submit" disabled={isLoading}>{isLoading ? "Analyzing" : "Run Sentinel"}</button>
-                <button type="button" className="secondaryButton" onClick={loadJudgeDemo}>Judge demo</button>
+                <button type="submit" disabled={isLoading}>{isLoading ? "Analyzing" : "Analyze intent"}</button>
+                <button type="button" className="secondaryButton" onClick={loadJudgeDemo}>Load demo case</button>
               </div>
             </form>
           </section>
@@ -428,14 +427,19 @@ export function SentinelConsole() {
           <section className={`panel decisionPanel ${scoreTone}`} aria-label="Decision state">
             <div className="panelHeader">
               <div>
-                <p className="sectionKicker">Autonomous decision</p>
+                <p className="sectionKicker">Policy decision</p>
                 <h2>{activeAnalysis.riskScore.band}</h2>
               </div>
               <span>{activeAnalysis.explanation.confidence.toFixed(2)} confidence</span>
             </div>
             <div className="decisionBadge">
-              <span>{activeAnalysis.decision}</span>
-              <strong>{activeAnalysis.riskScore.value}</strong>
+              <div className="riskDial" aria-label={`Risk score ${activeAnalysis.riskScore.value}`}>
+                <span>{activeAnalysis.riskScore.value}</span>
+              </div>
+              <div>
+                <span>{activeAnalysis.decision}</span>
+                <strong>{activeAnalysis.riskScore.band}</strong>
+              </div>
             </div>
             <p className="decisionMessage">{activeAnalysis.requiredUserMessage}</p>
             <div className="timeline" aria-label="Security pipeline">
@@ -453,8 +457,8 @@ export function SentinelConsole() {
         <section className="panel explanationPanel">
           <div className="panelHeader">
             <div>
-              <p className="sectionKicker">Analyst reasoning</p>
-              <h2>Observed facts separated from inferred risk</h2>
+              <p className="sectionKicker">AI explanation</p>
+              <h2>Evidence and inference stay separate</h2>
             </div>
             <span>{activeAnalysis.explanation.source}</span>
           </div>
@@ -468,14 +472,14 @@ export function SentinelConsole() {
         <section className="panel signalPanel">
           <div className="panelHeader">
             <div>
-              <p className="sectionKicker">Detector stack</p>
-              <h2>Signals the agent can defend</h2>
+              <p className="sectionKicker">Detector output</p>
+              <h2>Signals behind the decision</h2>
             </div>
             <span>{activeAnalysis.signals.length} signals</span>
           </div>
           <div className="signalGrid">
             {activeAnalysis.signals.map((signal) => (
-              <article key={signal.id} className="signalItem">
+              <article key={signal.id} className={`signalItem ${signal.impact.toLowerCase()}`}>
                 <div>
                   <strong>{signal.detectorId}</strong>
                   <span>{signal.category}</span>
@@ -490,8 +494,8 @@ export function SentinelConsole() {
         <section className="panel" id="policy">
           <div className="panelHeader">
             <div>
-              <p className="sectionKicker">Security policy</p>
-              <h2>Judge-tunable controls</h2>
+              <p className="sectionKicker">Policy controls</p>
+              <h2>Thresholds and lists</h2>
             </div>
             <span>{policy.version}</span>
           </div>
@@ -539,8 +543,8 @@ export function SentinelConsole() {
           <section className="panel" id="reports">
             <div className="panelHeader">
               <div>
-                <p className="sectionKicker">Audit trail</p>
-                <h2>Previous analyses</h2>
+                <p className="sectionKicker">Review history</p>
+                <h2>Recent analyses</h2>
               </div>
               <button type="button" className="secondaryButton" onClick={() => { void refreshReports(); }}>Refresh</button>
             </div>
@@ -554,9 +558,9 @@ export function SentinelConsole() {
               {displayedReports.map((report) => (
                 <button key={report.id} type="button" className="reportRow" onClick={() => { void loadReport(report.id); }}>
                   <span>{shorten(report.walletAddress)}</span>
-                  <span>{report.riskScore}</span>
-                  <span className={toneForDecision(report.decision)}>{report.decision}</span>
-                  <span className={toneForStatus(report.casperStatus)}>{formatStatus(report.casperStatus)}</span>
+                  <span className="riskCell"><i style={{ width: `${report.riskScore}%` }} /><b>{report.riskScore}</b></span>
+                  <span className={`tablePill ${toneForDecision(report.decision)}`}>{report.decision}</span>
+                  <span className={`tablePill ${toneForStatus(report.casperStatus)}`}>{formatStatus(report.casperStatus)}</span>
                 </button>
               ))}
             </div>
@@ -565,7 +569,7 @@ export function SentinelConsole() {
           <section className="panel detailPanel" id="detail">
             <div className="panelHeader">
               <div>
-                <p className="sectionKicker">Attestation packet</p>
+                <p className="sectionKicker">Evidence packet</p>
                 <h2>{selectedReport?.id.slice(0, 12) ?? activeAnalysis.reportId}</h2>
               </div>
               <span>{formatStatus(selectedReport?.casperStatus ?? activeAnalysis.casperPublication.status)}</span>
@@ -588,7 +592,7 @@ export function SentinelConsole() {
                 disabled={isPublishing || selectedReport?.casperStatus === "confirmed"}
                 onClick={() => { void retryPublication(selectedReport?.id ?? activeAnalysis.reportId); }}
               >
-                {isPublishing ? "Queueing" : "Queue Casper publication"}
+                {isPublishing ? "Queueing" : "Queue Casper attestation"}
               </button>
             </div>
           </section>
@@ -758,3 +762,4 @@ function shorten(value: string): string {
   if (value.length <= 18) return value;
   return `${value.slice(0, 8)}...${value.slice(-6)}`;
 }
+
