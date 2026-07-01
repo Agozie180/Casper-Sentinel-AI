@@ -148,9 +148,10 @@ can explain the decision, but it cannot change `APPROVE`, `WARN`, or `BLOCK`.
 
 ## Dashboard Workflow
 
-The dashboard is a functional local security console. It lets a user enter a wallet address,
+The dashboard is a judge-ready security command center. It lets a user enter a wallet address,
 prepare safe, warning, or blocking transaction intents, submit analysis to the API, inspect the
-analyst explanation, and open saved report detail from the audit trail.
+analyst explanation, open saved report detail from the audit trail, and use a clearly labeled local
+judge demo when the API is unavailable. The local demo never claims a Casper transaction hash.
 
 Run the API and dashboard in separate terminals:
 
@@ -171,11 +172,28 @@ Deployment hosting is not wired yet. The intended MVP deployment shape is:
 - Casper Testnet contract deployed from `contracts/risk-report-registry` once runtime bindings are implemented.
 - Worker configured with `JsonRpcCasperDeployGateway` and a secure signer implementation for live report publication.
 
-No deployment command should claim success until all infrastructure and Casper transactions are confirmed. Phase 9 adds JSON-RPC submission and confirmation polling boundaries, but the repo still does not include a private-key signer or a committed live Testnet transaction hash.
+No deployment command should claim success until all infrastructure and Casper transactions are confirmed. Phase 9 adds JSON-RPC submission and confirmation polling boundaries, and the hackathon polish pass adds `scripts/deploy-casper-testnet.ps1` plus a local Wasm build path. The repo still does not include a private-key signer, `casper-client`, or a committed live Testnet transaction hash.
+
+## Smart Contract Deployment
+
+Build the local Wasm artifact:
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo build -p risk-report-registry --target wasm32-unknown-unknown --release
+```
+
+Submit to Casper Testnet only after installing `casper-client` and providing a funded deploy key:
+
+```powershell
+.\\scripts\\deploy-casper-testnet.ps1 -SecretKeyPath C:\\path\\to\\funded-testnet-secret-key.pem
+```
+
+The script refuses to deploy without `casper-client`, the Wasm artifact, and a real key path.
 
 ## Screenshots
 
-Use the demo script to capture the dashboard states for `SAFE`, `WARNING`, `BLOCK`, and publication retry flows after starting the local API and dashboard.
+Use the demo script to capture the dashboard states for `SAFE`, `WARNING`, `BLOCK`, local judge demo, and publication retry flows after starting the local API and dashboard.
 
 ## Demo Flow
 
@@ -201,7 +219,7 @@ Use the demo script to capture the dashboard states for `SAFE`, `WARNING`, `BLOC
 
 ## Development Status
 
-Current phase: **Phase 9 complete - live Casper Testnet readiness, signer/deployment still external**.
+Current phase: **Hackathon polish complete - UI elevated, Wasm builds, Testnet deploy blocked on external Casper client/key**.
 
 Phase 1 completed:
 
@@ -275,7 +293,14 @@ Phase 9 completed:
 - Live readiness validation for RPC, SSE, contract hash, and publisher public key configuration.
 - Casper Testnet publication runbook that separates readiness from an actual submitted transaction.
 
-Next work: implement the secure signer and Casper Wasm runtime wrapper, deploy the contract to Testnet, then publish one real queued report and record the transaction evidence.
+Hackathon polish completed:
+
+- Command-center dashboard redesign with stronger first impression, responsive layouts, and judge-safe local demo mode.
+- Clearer AI reasoning, detector stack, audit trail, and attestation packet presentation.
+- Local contract Wasm build verified for `wasm32-unknown-unknown`.
+- Guarded Casper Testnet deployment script added under `scripts/deploy-casper-testnet.ps1`.
+
+Next work: install `casper-client`, provide a funded Testnet key, deploy the contract to Testnet, then publish one real queued report and record the transaction evidence.
 
 ## References
 
