@@ -1,29 +1,94 @@
-:root {
+/* =========================================================================
+   Casper Sentinel AI — dashboard design system
+   Two themes, switched via [data-theme] on <html>:
+     dark  = premium cybersecurity (black)
+     light = clean enterprise (white)
+   Tokens carry every colour so components stay theme-agnostic.
+   ========================================================================= */
+
+/* -- Dark theme (default) ------------------------------------------------- */
+:root,
+[data-theme="dark"] {
   color-scheme: dark;
-  --background: #05070a;
-  --background-soft: #090d12;
-  --sidebar: #070a0f;
-  --surface: #0d131b;
-  --surface-raised: #121a24;
-  --surface-control: #080d13;
-  --surface-glass: rgba(14, 21, 30, 0.78);
-  --line: #26313f;
-  --line-soft: rgba(255, 255, 255, 0.07);
-  --line-strong: #3a4a5f;
-  --text: #f5f7fb;
-  --muted: #8f9bae;
-  --muted-strong: #c2cad6;
-  --secure: #36d6ba;
-  --secure-soft: rgba(54, 214, 186, 0.13);
-  --warning: #f4b03e;
-  --warning-soft: rgba(244, 176, 62, 0.14);
-  --danger: #ff5c66;
-  --danger-soft: rgba(255, 92, 102, 0.14);
-  --info: #72a7ff;
-  --info-soft: rgba(114, 167, 255, 0.13);
-  --violet: #b69cff;
-  --shadow: 0 22px 70px rgba(0, 0, 0, 0.32);
-  --radius: 8px;
+
+  --background: #06080b;
+  --background-soft: #0a0e14;
+  --sidebar: #080b10;
+  --surface: #0e141c;
+  --surface-raised: #131b25;
+  --surface-control: #0b1119;
+  --surface-hover: rgba(255, 255, 255, 0.045);
+
+  --line: #232e3c;
+  --line-soft: rgba(255, 255, 255, 0.08);
+  --line-strong: #33465c;
+
+  --text: #f3f6fb;
+  --text-soft: #cdd6e4;
+  --muted: #8b98ab;
+  --muted-strong: #b6c0d0;
+
+  --primary: #2fb8a4;
+  --primary-strong: #1f9c8b;
+  --on-primary: #04120f;
+
+  --secure: #34d6b6;
+  --warning: #f0b34a;
+  --danger: #ff6470;
+  --info: #6fa8ff;
+
+  --glow: 0.9;
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.42);
+  --shadow-soft: 0 12px 34px rgba(0, 0, 0, 0.28);
+  --ring: rgba(111, 168, 255, 0.6);
+
+  --radius: 12px;
+  --radius-sm: 9px;
+}
+
+/* -- Light theme ---------------------------------------------------------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --background: #f6f7f9;
+  --background-soft: #ffffff;
+  --sidebar: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-control: #f4f6f8;
+  --surface-hover: rgba(15, 23, 42, 0.04);
+
+  --line: #e4e8ee;
+  --line-soft: rgba(15, 23, 42, 0.09);
+  --line-strong: #cfd6e0;
+
+  --text: #0f172a;
+  --text-soft: #3f4a5c;
+  --muted: #64748b;
+  --muted-strong: #475569;
+
+  --primary: #0f9d8c;
+  --primary-strong: #0b8375;
+  --on-primary: #ffffff;
+
+  --secure: #0f9d8c;
+  --warning: #b47714;
+  --danger: #d63c47;
+  --info: #2f6bd6;
+
+  --glow: 0.32;
+  --shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
+  --shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.07);
+  --ring: rgba(47, 107, 214, 0.42);
+}
+
+/* Soft semantic fills derived from the active tokens (no per-theme copies). */
+:root {
+  --primary-soft: color-mix(in srgb, var(--primary) 14%, transparent);
+  --secure-soft: color-mix(in srgb, var(--secure) 14%, transparent);
+  --warning-soft: color-mix(in srgb, var(--warning) 15%, transparent);
+  --danger-soft: color-mix(in srgb, var(--danger) 14%, transparent);
+  --info-soft: color-mix(in srgb, var(--info) 14%, transparent);
 }
 
 * {
@@ -38,13 +103,28 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(54, 214, 186, 0.06), transparent 360px),
-    linear-gradient(90deg, rgba(114, 167, 255, 0.05), rgba(255, 92, 102, 0.025)),
+    radial-gradient(
+      1100px 520px at 82% -8%,
+      color-mix(in srgb, var(--primary) calc(9% * var(--glow)), transparent),
+      transparent 70%
+    ),
     var(--background);
   color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
   font-size: 15px;
-  letter-spacing: 0;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
 }
 
 button,
@@ -55,73 +135,7 @@ textarea {
   font: inherit;
 }
 
-button,
-.primaryLaunch,
-.secondaryLaunch,
-.navLaunch {
-  min-height: 42px;
-  border: 1px solid rgba(54, 214, 186, 0.42);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, #139985, #0f766e);
-  color: white;
-  padding: 0 16px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-}
-
-button:hover:not(:disabled),
-.primaryLaunch:hover,
-.secondaryLaunch:hover,
-.navLaunch:hover {
-  border-color: rgba(54, 214, 186, 0.9);
-  box-shadow: 0 10px 26px rgba(54, 214, 186, 0.12);
-  transform: translateY(-1px);
-}
-
-button:disabled {
-  cursor: wait;
-  opacity: 0.62;
-}
-
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid rgba(114, 167, 255, 0.9);
-  outline-offset: 3px;
-}
-
-input,
-textarea {
-  min-width: 0;
-  width: 100%;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: rgba(8, 13, 19, 0.88);
-  color: var(--text);
-  padding: 11px 12px;
-  outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
-}
-
-textarea {
-  min-height: 98px;
-  resize: vertical;
-}
-
-input:hover,
-textarea:hover {
-  border-color: var(--line-strong);
-}
-
-input:focus,
-textarea:focus {
-  border-color: rgba(114, 167, 255, 0.78);
-  background: #0a1119;
-  box-shadow: 0 0 0 3px rgba(114, 167, 255, 0.13);
-}
-
+/* -- Typography ----------------------------------------------------------- */
 h1,
 h2,
 h3,
@@ -130,81 +144,34 @@ p {
 }
 
 h1 {
-  margin-top: 9px;
-  font-size: clamp(2rem, 3.2vw, 3.4rem);
-  font-weight: 650;
-  line-height: 0.98;
+  margin-top: 8px;
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.02em;
 }
 
 h2 {
-  margin-top: 4px;
-  font-size: 1.08rem;
-  font-weight: 650;
-  line-height: 1.25;
+  margin-top: 2px;
+  font-size: 1.06rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 h3 {
   font-size: 0.95rem;
-  font-weight: 650;
-  line-height: 1.3;
+  font-weight: 600;
+  line-height: 1.35;
 }
 
-.shell {
-  display: grid;
-  grid-template-columns: 282px minmax(0, 1fr);
-  min-height: 100vh;
+strong,
+b {
+  font-weight: 600;
 }
 
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  border-right: 1px solid var(--line-soft);
-  background:
-    linear-gradient(180deg, rgba(12, 18, 26, 0.96), rgba(5, 7, 10, 0.98)),
-    var(--sidebar);
-  padding: 24px;
-}
-
-.brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 30px;
-}
-
-.brandMark {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border: 1px solid rgba(54, 214, 186, 0.46);
-  border-radius: var(--radius);
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.18), transparent 34%),
-    linear-gradient(135deg, rgba(54, 214, 186, 0.2), rgba(114, 167, 255, 0.14));
-}
-
-.brandMark span,
-.landingBrand span {
-  width: 15px;
-  height: 20px;
-  border: 2px solid var(--secure);
-  border-top-width: 5px;
-  border-radius: 9px 9px 6px 6px;
-}
-
-.brand strong,
-.brand span {
-  display: block;
-}
-
-.brand strong {
-  line-height: 1.15;
-}
-
-.brand span,
 .muted,
+.brand span,
 .emptyRow,
 .metric span,
 .panelHeader span,
@@ -217,72 +184,293 @@ h3 {
   color: var(--muted);
 }
 
+.eyebrow,
+.sectionKicker,
+.landingEyebrow,
+.sideModule > span,
+.proofStrip span,
+.workflowRail span {
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+/* -- Buttons -------------------------------------------------------------- */
+button,
+.primaryLaunch,
+.secondaryLaunch,
+.navLaunch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: 0 16px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease,
+    opacity 150ms ease;
+}
+
+button:hover:not(:disabled),
+.primaryLaunch:hover,
+.navLaunch:hover {
+  background: var(--primary-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.secondaryButton,
+.secondaryLaunch {
+  background: var(--surface-control);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.secondaryButton:hover:not(:disabled),
+.secondaryLaunch:hover {
+  background: var(--surface-hover);
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* -- Form controls -------------------------------------------------------- */
+input,
+textarea {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-control);
+  color: var(--text);
+  padding: 10px 12px;
+  outline: none;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background 140ms ease;
+}
+
+textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+
+input:hover,
+textarea:hover {
+  border-color: var(--line-strong);
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+/* -- Theme toggle --------------------------------------------------------- */
+.themeToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-control);
+  color: var(--muted-strong);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.themeToggle:hover {
+  background: var(--surface-hover);
+  border-color: var(--line-strong);
+  color: var(--text);
+  transform: none;
+  box-shadow: none;
+}
+
+.themeToggle svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* -- Site footer ---------------------------------------------------------- */
+.siteFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--muted);
+  font-size: 0.82rem;
+  padding: 22px 16px;
+  text-align: center;
+}
+
+.siteFooter b {
+  color: var(--muted-strong);
+  font-weight: 600;
+}
+
+.appFooter {
+  border-top: 1px solid var(--line-soft);
+  margin-top: 4px;
+  padding-top: 16px;
+}
+
+/* =========================================================================
+   Console layout
+   ========================================================================= */
+.shell {
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line-soft);
+  background: var(--sidebar);
+  padding: 22px;
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 26px;
+}
+
+.brandMark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.brandMark span,
+.landingBrand span {
+  width: 14px;
+  height: 19px;
+  border: 2px solid var(--primary);
+  border-top-width: 5px;
+  border-radius: 8px 8px 5px 5px;
+}
+
+.brand strong,
+.brand span {
+  display: block;
+}
+
+.brand strong {
+  line-height: 1.2;
+}
+
+.brand span {
+  font-size: 0.82rem;
+}
+
 .sideNav {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .sideNav a {
   position: relative;
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   color: var(--muted-strong);
-  padding: 10px 12px 10px 32px;
+  padding: 9px 12px 9px 32px;
+  font-weight: 500;
   text-decoration: none;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
 }
 
 .sideNav a::before {
   position: absolute;
   top: 50%;
-  left: 12px;
-  width: 8px;
-  height: 8px;
-  border: 1px solid currentColor;
+  left: 13px;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid currentColor;
   border-radius: 999px;
   content: "";
   transform: translateY(-50%);
+  opacity: 0.7;
 }
 
-.sideNav a:first-child,
 .sideNav a:hover {
-  border-color: var(--line-soft);
-  background: rgba(18, 26, 36, 0.76);
+  background: var(--surface-hover);
   color: var(--text);
 }
 
 .sideModule {
-  position: absolute;
-  right: 24px;
-  bottom: 24px;
-  left: 24px;
+  margin-top: auto;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
-  background: rgba(8, 13, 19, 0.72);
+  background: var(--surface-control);
   padding: 15px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.sideModule span,
-.sectionKicker,
-.eyebrow,
-.landingEyebrow {
-  color: var(--secure);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.sideModule > span {
+  display: block;
 }
 
 .sideModule strong {
   display: block;
-  margin: 8px 0 6px;
+  margin: 9px 0 6px;
+  font-size: 0.95rem;
+}
+
+.sideModule p {
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .workspace {
   display: grid;
   gap: 18px;
   align-content: start;
-  padding: 24px;
+  padding: 24px clamp(16px, 3vw, 30px);
 }
 
 .heroBar,
@@ -299,128 +487,110 @@ h3 {
 .heroBar {
   position: relative;
   overflow: hidden;
-  min-height: 212px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
   background:
-    linear-gradient(120deg, rgba(18, 26, 36, 0.96), rgba(8, 13, 19, 0.94)),
-    linear-gradient(90deg, rgba(54, 214, 186, 0.12), rgba(114, 167, 255, 0.09));
-  padding: clamp(22px, 4vw, 42px);
-  box-shadow: var(--shadow);
-}
-
-.heroBar::after {
-  position: absolute;
-  inset: auto 0 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(54, 214, 186, 0.55), transparent);
-  content: "";
+    radial-gradient(
+      900px 300px at 100% 0%,
+      color-mix(in srgb, var(--primary) calc(12% * var(--glow)), transparent),
+      transparent 65%
+    ),
+    var(--surface);
+  padding: clamp(20px, 3vw, 30px);
+  box-shadow: var(--shadow-soft);
+  align-items: flex-start;
 }
 
 .heroCopy {
-  max-width: 760px;
+  max-width: 720px;
+  display: grid;
+  gap: 10px;
 }
 
-.heroCopy p:last-child,
-.decisionMessage,
-.detailNote {
-  color: #d6dfec;
+.heroCopy p:last-child {
+  color: var(--text-soft);
   line-height: 1.58;
+  max-width: 640px;
 }
 
 .heroActions {
   justify-content: flex-end;
   flex-wrap: wrap;
-  min-width: 270px;
+  gap: 10px;
 }
 
-.metricStrip,
-.analysisGrid,
-.explanationGrid,
-.lowerGrid,
-.signalGrid,
-.policyGrid,
-.fieldPair {
-  display: grid;
-  gap: 14px;
+.walletCluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-control);
+  padding: 4px 4px 4px 12px;
 }
 
-.metricStrip {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.walletCluster .walletKey {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
-.analysisGrid {
-  grid-template-columns: minmax(0, 1.05fr) minmax(350px, 0.95fr);
+.walletCluster .walletDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--secure);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--secure) 22%, transparent);
 }
 
-.explanationGrid,
-.lowerGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+.walletCluster button {
+  min-height: 30px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted-strong);
 }
 
-.signalGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.walletCluster button:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--line));
+  box-shadow: none;
 }
 
-.policyGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.fieldPair {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.panel {
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  background:
-    linear-gradient(180deg, rgba(18, 26, 36, 0.86), rgba(11, 17, 25, 0.86)),
-    var(--surface);
-  padding: 18px;
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.2);
-}
-
-.panelHeader {
-  margin-bottom: 16px;
-}
-
-.panelHeader > div {
-  min-width: 0;
-}
-
-.panelHeader h2,
-.panelHeader span {
-  overflow-wrap: anywhere;
-}
-
-.alert {
-  border: 1px solid rgba(244, 176, 62, 0.38);
-  border-radius: var(--radius);
-  background: rgba(244, 176, 62, 0.09);
-  color: #ffe3af;
-  padding: 12px 14px;
-}
-
+/* -- Status pills --------------------------------------------------------- */
 .statusPill,
 .tablePill {
-  border: 1px solid var(--line-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--muted-strong);
-  min-width: 118px;
-  padding: 8px 12px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
   text-align: center;
   text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.statusPill::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  content: "";
 }
 
 .tablePill {
-  display: inline-flex;
-  min-width: 0;
-  width: fit-content;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 9px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
@@ -450,6 +620,155 @@ h3 {
   color: var(--info);
 }
 
+/* -- Alerts --------------------------------------------------------------- */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
+  border-radius: var(--radius-sm);
+  background: var(--warning-soft);
+  color: var(--text);
+  padding: 12px 14px;
+  line-height: 1.5;
+}
+
+.alert::before {
+  content: "!";
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 999px;
+  background: var(--warning);
+  color: var(--on-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* -- Metrics -------------------------------------------------------------- */
+.metricStrip,
+.analysisGrid,
+.explanationGrid,
+.lowerGrid,
+.signalGrid,
+.policyGrid,
+.fieldPair {
+  display: grid;
+  gap: 14px;
+}
+
+.metricStrip {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.metric {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 5px;
+  min-height: 78px;
+  min-width: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 14px 15px;
+}
+
+.metric span {
+  font-size: 0.78rem;
+}
+
+.metric::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--info);
+  content: "";
+}
+
+.metric.secure::before {
+  background: var(--secure);
+}
+.metric.warning::before {
+  background: var(--warning);
+}
+.metric.danger::before {
+  background: var(--danger);
+}
+.metric.approve::before {
+  background: var(--secure);
+}
+.metric.warn::before {
+  background: var(--warning);
+}
+.metric.block::before {
+  background: var(--danger);
+}
+
+.metric strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* -- Panels --------------------------------------------------------------- */
+.analysisGrid {
+  grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
+}
+
+.explanationGrid,
+.lowerGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.signalGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.policyGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.fieldPair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.panelHeader {
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+
+.panelHeader > div {
+  min-width: 0;
+}
+
+.panelHeader h2,
+.panelHeader span {
+  overflow-wrap: anywhere;
+}
+
+.panelHeader > span {
+  flex: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.sectionKicker {
+  margin-bottom: 4px;
+}
+
 .analysisForm,
 .explanationPanel,
 .detailPanel,
@@ -462,19 +781,13 @@ h3 {
 .analysisForm label,
 .policyGrid label {
   display: grid;
-  gap: 7px;
+  gap: 6px;
   color: var(--muted-strong);
-  font-size: 0.86rem;
-  font-weight: 600;
+  font-size: 0.84rem;
+  font-weight: 500;
 }
 
-.secondaryButton,
-.secondaryLaunch {
-  border-color: var(--line-strong);
-  background: rgba(8, 13, 19, 0.82);
-  color: var(--text) !important;
-}
-
+/* -- Scenario selector ---------------------------------------------------- */
 .scenarioRail {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -483,99 +796,146 @@ h3 {
 
 .scenarioRail button {
   display: grid;
-  height: 68px;
+  gap: 3px;
+  height: auto;
+  min-height: 62px;
   align-content: center;
-  border-color: var(--line-soft);
-  background: rgba(8, 13, 19, 0.82);
+  justify-items: start;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-control);
   color: var(--muted-strong);
-  padding: 9px;
+  padding: 10px 12px;
   text-align: left;
+}
+
+.scenarioRail button:hover:not(:disabled) {
+  background: var(--surface-hover);
+  transform: none;
+  box-shadow: none;
 }
 
 .scenarioRail button span {
   color: var(--text);
   font-size: 0.76rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .scenarioRail button small {
   overflow: hidden;
+  max-width: 100%;
   color: var(--muted);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .scenarioRail button.active {
-  border-color: rgba(114, 167, 255, 0.72);
-  background: linear-gradient(180deg, rgba(114, 167, 255, 0.16), rgba(18, 26, 36, 0.9));
+  border-color: var(--primary);
+  background: var(--primary-soft);
 }
 
+.scenarioRail button.active span {
+  color: var(--primary);
+}
+
+.actionRow {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+/* -- Decision panel ------------------------------------------------------- */
 .decisionPanel.approve {
-  border-color: rgba(54, 214, 186, 0.38);
+  border-color: color-mix(in srgb, var(--secure) 40%, var(--line-soft));
 }
-
 .decisionPanel.warn {
-  border-color: rgba(244, 176, 62, 0.38);
+  border-color: color-mix(in srgb, var(--warning) 40%, var(--line-soft));
 }
-
 .decisionPanel.block {
-  border-color: rgba(255, 92, 102, 0.42);
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--line-soft));
 }
 
 .decisionBadge {
   display: grid;
-  grid-template-columns: 126px minmax(0, 1fr);
+  grid-template-columns: 118px minmax(0, 1fr);
   align-items: center;
   gap: 18px;
   border: 1px solid var(--line-soft);
   border-radius: var(--radius);
-  background:
-    linear-gradient(120deg, rgba(18, 26, 36, 0.92), rgba(8, 13, 19, 0.97)),
-    var(--surface-raised);
+  background: var(--surface-control);
   padding: 20px;
 }
 
 .riskDial {
   display: grid;
-  width: 110px;
+  width: 104px;
   aspect-ratio: 1;
   place-items: center;
   border-radius: 999px;
   background:
-    radial-gradient(circle at center, #0b1119 0 54%, transparent 55%),
-    conic-gradient(var(--danger) 0 338deg, rgba(255, 255, 255, 0.08) 338deg 360deg);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 18px 36px rgba(255, 92, 102, 0.12);
+    radial-gradient(circle at center, var(--surface) 0 54%, transparent 55%),
+    conic-gradient(
+      var(--dial-color, var(--danger)) calc(var(--dial, 94) * 3.6deg),
+      color-mix(in srgb, var(--muted) 22%, transparent) 0
+    );
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
+.decisionPanel.approve .riskDial {
+  --dial-color: var(--secure);
+}
+.decisionPanel.warn .riskDial {
+  --dial-color: var(--warning);
+}
+.decisionPanel.block .riskDial {
+  --dial-color: var(--danger);
 }
 
 .riskDial span {
   color: var(--text);
-  font-size: 2rem;
-  font-weight: 750;
+  font-size: 1.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .decisionBadge > div:last-child {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
 .decisionBadge > div:last-child span {
-  color: var(--danger);
-  font-size: clamp(1.55rem, 3vw, 2.45rem);
-  font-weight: 750;
-  line-height: 0.95;
+  font-size: clamp(1.3rem, 2.3vw, 1.85rem);
+  font-weight: 600;
+  line-height: 1.05;
   overflow-wrap: anywhere;
+}
+
+.decisionPanel.approve .decisionBadge span {
+  color: var(--secure);
+}
+.decisionPanel.warn .decisionBadge span {
+  color: var(--warning);
+}
+.decisionPanel.block .decisionBadge span {
+  color: var(--danger);
 }
 
 .decisionBadge > div:last-child strong {
   color: var(--muted-strong);
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
+.decisionMessage {
+  color: var(--text-soft);
+  line-height: 1.58;
+}
+
+/* -- Timeline ------------------------------------------------------------- */
 .timeline {
   display: grid;
   gap: 10px;
@@ -583,95 +943,69 @@ h3 {
 
 .timeline > div {
   display: grid;
-  grid-template-columns: 16px minmax(0, 0.85fr) minmax(0, 1fr);
+  grid-template-columns: 14px minmax(0, 0.8fr) minmax(0, 1fr);
   align-items: center;
   gap: 10px;
 }
 
 .timeline > div > span {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 999px;
   background: var(--info);
-  box-shadow: 0 0 0 4px rgba(114, 167, 255, 0.08);
+  box-shadow: 0 0 0 4px var(--info-soft);
+}
+
+.timeline strong {
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .timeline .complete > span,
 .timeline .approve > span {
   background: var(--secure);
-  box-shadow: 0 0 0 4px rgba(54, 214, 186, 0.1);
+  box-shadow: 0 0 0 4px var(--secure-soft);
 }
 
 .timeline .warn > span {
   background: var(--warning);
-  box-shadow: 0 0 0 4px rgba(244, 176, 62, 0.1);
+  box-shadow: 0 0 0 4px var(--warning-soft);
 }
 
 .timeline .block > span {
   background: var(--danger);
-  box-shadow: 0 0 0 4px rgba(255, 92, 102, 0.1);
+  box-shadow: 0 0 0 4px var(--danger-soft);
 }
 
-.metric {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  background: rgba(8, 13, 19, 0.82);
-  display: grid;
-  gap: 5px;
-  min-height: 80px;
-  min-width: 0;
-  padding: 13px;
-}
-
-.metric::before {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 3px;
-  background: var(--info);
-  content: "";
-}
-
-.metric.secure::before { background: var(--secure); }
-.metric.warning::before { background: var(--warning); }
-.metric.danger::before { background: var(--danger); }
-.metric.approve::before { background: var(--secure); }
-.metric.warn::before { background: var(--warning); }
-.metric.block::before { background: var(--danger); }
-
-.metric strong {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  font-size: 1.18rem;
-  font-weight: 700;
-}
-
+/* -- Evidence + signals --------------------------------------------------- */
 .evidenceList,
 .signalItem {
   border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  background: rgba(8, 13, 19, 0.76);
-  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-control);
+  padding: 15px;
+}
+
+.evidenceList h3 {
+  margin-bottom: 10px;
 }
 
 .evidenceList ul {
   display: grid;
   gap: 8px;
-  margin: 10px 0 0;
+  margin: 0;
   padding-left: 18px;
 }
 
 .evidenceList li,
 .recommendation,
 .signalItem p {
-  color: #d9e3f2;
+  color: var(--text-soft);
   line-height: 1.5;
 }
 
 .recommendation {
-  border-left: 3px solid var(--secure);
-  color: #dce8f7;
+  border-left: 3px solid var(--primary);
   padding-left: 12px;
 }
 
@@ -690,30 +1024,51 @@ h3 {
   content: "";
 }
 
-.signalItem.block::before { background: var(--danger); }
-.signalItem.warn::before { background: var(--warning); }
-.signalItem.approve::before { background: var(--secure); }
+.signalItem.block::before {
+  background: var(--danger);
+}
+.signalItem.warn::before {
+  background: var(--warning);
+}
+.signalItem.approve::before {
+  background: var(--secure);
+}
 
-.signalItem div {
+.signalItem > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
+.signalItem strong {
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
 .signalItem b {
   color: var(--warning);
-  font-size: 1.45rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
-.signalItem.block b { color: var(--danger); }
-.signalItem.approve b { color: var(--secure); }
+.signalItem.block b {
+  color: var(--danger);
+}
+.signalItem.approve b {
+  color: var(--secure);
+}
 
+/* -- Report table --------------------------------------------------------- */
 .tableHeader,
 .reportRow {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(92px, 0.55fr) minmax(90px, 0.75fr) minmax(105px, 0.9fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(92px, 0.55fr) minmax(90px, 0.75fr) minmax(
+      105px,
+      0.9fr
+    );
   gap: 12px;
   align-items: center;
 }
@@ -721,31 +1076,34 @@ h3 {
 .tableHeader {
   border-bottom: 1px solid var(--line-soft);
   color: var(--muted);
-  font-size: 0.76rem;
-  font-weight: 700;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
   padding-bottom: 10px;
   text-transform: uppercase;
 }
 
 .reportList {
   display: grid;
-  gap: 6px;
+  gap: 2px;
+  margin-top: 4px;
 }
 
 .reportRow {
-  min-height: 50px;
+  min-height: 48px;
   width: 100%;
-  border-color: transparent;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--text);
-  padding: 10px 0;
+  padding: 8px 10px;
   text-align: left;
 }
 
 .reportRow:hover {
   border-color: var(--line-soft);
-  background: rgba(8, 13, 19, 0.72);
-  padding-inline: 10px;
+  background: var(--surface-hover);
+  transform: none;
+  box-shadow: none;
 }
 
 .reportRow span,
@@ -753,7 +1111,6 @@ h3 {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-transform: capitalize;
   white-space: nowrap;
 }
 
@@ -766,35 +1123,114 @@ h3 {
 
 .riskCell i {
   display: block;
+  flex: 1;
   height: 6px;
+  min-width: 24px;
   max-width: 100%;
   border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 26%, transparent);
+  overflow: hidden;
+}
+
+.riskCell i::before {
+  display: block;
+  height: 100%;
+  width: var(--risk, 0%);
+  border-radius: 999px;
   background: linear-gradient(90deg, var(--warning), var(--danger));
+  content: "";
 }
 
 .riskCell b {
   font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
 }
 
+/* -- Detail --------------------------------------------------------------- */
 .detailGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
+.detailNote {
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+
 .detailActions {
   justify-content: flex-start;
 }
 
+/* -- States: empty + skeleton loading ------------------------------------- */
 .emptyRow {
-  padding: 18px 0 4px;
+  display: grid;
+  gap: 4px;
+  padding: 22px 4px;
+  text-align: center;
 }
 
+.emptyRow strong {
+  color: var(--muted-strong);
+  font-weight: 600;
+}
+
+.skeletonRow {
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--surface-control) 0%,
+    var(--surface-hover) 50%,
+    var(--surface-control) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.isBusy {
+  position: relative;
+}
+
+.isBusy::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--primary);
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================================
+   Landing page
+   ========================================================================= */
 .landingShell {
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(54, 214, 186, 0.07), transparent 390px),
-    linear-gradient(90deg, rgba(114, 167, 255, 0.05), rgba(255, 92, 102, 0.025)),
+    radial-gradient(
+      1000px 480px at 88% -6%,
+      color-mix(in srgb, var(--primary) calc(11% * var(--glow)), transparent),
+      transparent 68%
+    ),
     var(--background);
   color: var(--text);
 }
@@ -808,98 +1244,74 @@ h3 {
   justify-content: space-between;
   gap: 20px;
   border-bottom: 1px solid var(--line-soft);
-  background: rgba(5, 7, 10, 0.86);
-  padding: 16px clamp(20px, 5vw, 76px);
-  backdrop-filter: blur(18px);
+  background: color-mix(in srgb, var(--background) 82%, transparent);
+  padding: 14px clamp(20px, 5vw, 76px);
+  backdrop-filter: blur(16px);
 }
 
 .landingBrand,
-.landingNav div,
+.landingNav > div,
 .landingActions {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.landingBrand,
 .landingNav a {
   color: var(--muted-strong);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .landingBrand {
   color: var(--text);
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
-.landingNav div a {
-  border-radius: var(--radius);
-  padding: 9px 10px;
+.landingNav > div a:not(.navLaunch) {
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  transition: color 140ms ease;
+}
+
+.landingNav > div a:not(.navLaunch):hover {
+  color: var(--text);
 }
 
 .navLaunch,
 .primaryLaunch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-color: rgba(54, 214, 186, 0.56);
-  color: white !important;
-}
-
-.secondaryLaunch {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 15px;
+  color: var(--on-primary);
 }
 
 .landingHero {
   position: relative;
-  isolation: isolate;
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(420px, 0.78fr);
-  gap: clamp(28px, 5vw, 68px);
-  min-height: min(760px, calc(100vh - 72px));
+  grid-template-columns: minmax(0, 1fr) minmax(400px, 0.82fr);
+  gap: clamp(28px, 5vw, 64px);
   align-items: center;
-  overflow: hidden;
   border-bottom: 1px solid var(--line-soft);
-  padding: clamp(62px, 8vw, 104px) clamp(20px, 5vw, 76px) clamp(52px, 6vw, 78px);
-}
-
-.landingHero::before {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  content: "";
-  background:
-    linear-gradient(90deg, rgba(5, 7, 10, 0.98), rgba(5, 7, 10, 0.86) 48%, rgba(5, 7, 10, 0.62)),
-    linear-gradient(135deg, rgba(54, 214, 186, 0.14), rgba(114, 167, 255, 0.09) 42%, rgba(255, 92, 102, 0.06));
+  padding: clamp(48px, 7vw, 92px) clamp(20px, 5vw, 76px);
 }
 
 .landingHeroCopy {
-  max-width: 790px;
-  z-index: 1;
+  max-width: 720px;
 }
 
 .landingHero h1 {
-  margin: 12px 0 18px;
-  max-width: 850px;
-  font-size: clamp(2.65rem, 6.1vw, 5.8rem);
-  font-weight: 720;
-  line-height: 0.94;
-}
-
-.landingHeroCopy > p:last-of-type,
-.sectionIntro p,
-.capabilityGrid p,
-.faqGrid p {
-  color: #d5deec;
-  line-height: 1.65;
+  margin: 14px 0 18px;
+  max-width: 720px;
+  font-size: clamp(2.3rem, 5vw, 4rem);
+  font-weight: 600;
+  line-height: 1.03;
+  letter-spacing: -0.025em;
 }
 
 .landingHeroCopy > p:last-of-type {
-  max-width: 680px;
-  font-size: clamp(1.02rem, 1.5vw, 1.2rem);
+  max-width: 620px;
+  color: var(--text-soft);
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  line-height: 1.62;
 }
 
 .landingActions {
@@ -907,25 +1319,20 @@ h3 {
   margin-top: 28px;
 }
 
-.heroProductFrame {
-  position: relative;
-  z-index: 1;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: var(--radius);
-  background:
-    linear-gradient(180deg, rgba(18, 26, 36, 0.88), rgba(7, 11, 16, 0.94)),
-    var(--surface);
-  box-shadow: 0 34px 110px rgba(0, 0, 0, 0.46);
-  padding: 16px;
+.primaryLaunch,
+.secondaryLaunch {
+  min-height: 44px;
+  padding: 0 20px;
 }
 
-.heroProductFrame::before {
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
+/* Product preview frame */
+.heroProductFrame {
+  position: relative;
+  border: 1px solid var(--line-soft);
   border-radius: var(--radius);
-  background: linear-gradient(135deg, rgba(54, 214, 186, 0.36), transparent 38%, rgba(255, 92, 102, 0.22));
-  content: "";
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  padding: 16px;
 }
 
 .heroFrameTop,
@@ -936,51 +1343,64 @@ h3 {
 }
 
 .heroFrameTop {
-  grid-template-columns: 12px minmax(0, 1fr) auto;
+  grid-template-columns: 10px minmax(0, 1fr) auto;
   align-items: center;
   margin-bottom: 14px;
 }
 
 .heroFrameTop span {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 999px;
   background: var(--secure);
-  box-shadow: 0 0 18px rgba(54, 214, 186, 0.7);
+}
+
+.heroFrameTop strong {
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .heroFrameTop em {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-style: normal;
 }
 
 .heroDecision {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
+  align-items: center;
   gap: 16px;
   border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  background: rgba(8, 13, 19, 0.82);
-  padding: 20px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-control);
+  padding: 18px;
 }
 
-.heroDecision div {
+.heroDecision > div {
   display: grid;
-  gap: 8px;
+  gap: 6px;
+}
+
+.heroDecision span {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .heroDecision strong {
   color: var(--danger);
-  font-size: clamp(2rem, 4vw, 3.25rem);
-  line-height: 0.92;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  font-weight: 600;
+  line-height: 1;
 }
 
 .heroDecision b {
-  color: var(--text);
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  line-height: 0.85;
+  color: var(--danger);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 0.9;
 }
 
 .heroSignalGrid {
@@ -995,27 +1415,34 @@ h3 {
 .faqGrid article,
 .landingCta {
   border: 1px solid var(--line-soft);
-  border-radius: var(--radius);
-  background: rgba(13, 19, 27, 0.74);
+  border-radius: var(--radius-sm);
+  background: var(--surface-control);
   padding: 16px;
 }
 
 .heroSignalGrid div {
   display: grid;
-  gap: 6px;
+  gap: 5px;
 }
 
-.heroSignalGrid strong,
-.proofStrip strong,
-.workflowRail strong,
-.capabilityGrid h3,
-.faqGrid h3 {
-  font-weight: 650;
+.heroSignalGrid span {
+  font-size: 0.76rem;
 }
 
-.heroSignalGrid .secure strong { color: var(--secure); }
-.heroSignalGrid .info strong { color: var(--info); }
-.heroSignalGrid .danger strong { color: var(--danger); }
+.heroSignalGrid strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.heroSignalGrid .secure strong {
+  color: var(--secure);
+}
+.heroSignalGrid .info strong {
+  color: var(--info);
+}
+.heroSignalGrid .danger strong {
+  color: var(--danger);
+}
 
 .heroTrace {
   margin-top: 12px;
@@ -1025,13 +1452,15 @@ h3 {
   position: relative;
   border-left: 2px solid var(--line-strong);
   padding-left: 12px;
+  font-size: 0.85rem;
 }
 
 .heroTrace span:first-child,
 .heroTrace span:last-child {
-  border-left-color: var(--secure);
+  border-left-color: var(--primary);
 }
 
+/* Sections */
 .proofStrip,
 .landingSection,
 .landingCta {
@@ -1043,38 +1472,48 @@ h3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
-  padding: 28px 0 8px;
+  padding: 30px 0 4px;
 }
 
 .proofStrip div {
-  min-height: 104px;
+  min-height: 96px;
 }
 
 .proofStrip span,
 .workflowRail span {
   display: block;
-  color: var(--secure);
-  font-size: 0.78rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.proofStrip strong,
+.workflowRail strong {
+  font-size: 0.98rem;
+  font-weight: 600;
 }
 
 .landingSection {
-  padding: clamp(58px, 8vw, 96px) 0;
+  padding: clamp(52px, 7vw, 88px) 0;
 }
 
 .sectionIntro {
-  max-width: 790px;
-  margin-bottom: 24px;
+  max-width: 720px;
+  margin-bottom: 26px;
 }
 
 .sectionIntro h2,
 .landingCta h2 {
   margin: 8px 0 10px;
-  font-size: clamp(1.65rem, 3.4vw, 3rem);
-  font-weight: 700;
-  line-height: 1.05;
+  font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.sectionIntro p,
+.capabilityGrid p,
+.faqGrid p {
+  color: var(--text-soft);
+  line-height: 1.62;
 }
 
 .capabilityGrid,
@@ -1086,6 +1525,11 @@ h3 {
 
 .capabilityGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.capabilityGrid h3,
+.faqGrid h3 {
+  margin-bottom: 8px;
 }
 
 .workflowRail {
@@ -1101,12 +1545,19 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 52px;
+  margin-bottom: 48px;
   background:
-    linear-gradient(120deg, rgba(54, 214, 186, 0.12), rgba(114, 167, 255, 0.08)),
-    rgba(13, 19, 27, 0.82);
+    radial-gradient(
+      600px 200px at 0% 0%,
+      color-mix(in srgb, var(--primary) calc(14% * var(--glow)), transparent),
+      transparent 70%
+    ),
+    var(--surface-control);
 }
 
+/* =========================================================================
+   Responsive
+   ========================================================================= */
 @media (max-width: 1180px) {
   .metricStrip,
   .signalGrid,
@@ -1125,7 +1576,7 @@ h3 {
   }
 
   .heroProductFrame {
-    max-width: 720px;
+    max-width: 640px;
   }
 }
 
@@ -1144,12 +1595,7 @@ h3 {
   }
 
   .sideModule {
-    position: static;
     margin-top: 18px;
-  }
-
-  .workspace {
-    padding: 16px;
   }
 
   .heroBar,
@@ -1157,14 +1603,14 @@ h3 {
   .heroActions,
   .actionRow,
   .landingNav,
-  .landingNav div,
+  .landingNav > div,
   .landingCta {
     align-items: stretch;
     flex-direction: column;
   }
 
   .heroActions {
-    min-width: 0;
+    justify-content: flex-start;
   }
 
   .metricStrip,
@@ -1178,22 +1624,14 @@ h3 {
     grid-template-columns: 1fr;
   }
 
-  .landingNav div {
+  .landingNav > div {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .landingHero {
-    min-height: auto;
-    padding-top: 44px;
-  }
-
   .decisionBadge {
     grid-template-columns: 1fr;
-  }
-
-  .riskDial {
-    width: 96px;
+    justify-items: start;
   }
 }
 
@@ -1212,117 +1650,17 @@ h3 {
     gap: 8px;
     padding: 12px;
     border-color: var(--line-soft);
-    background: rgba(8, 13, 19, 0.72);
+    background: var(--surface-control);
   }
 
   .landingHero h1 {
-    font-size: clamp(2.35rem, 13vw, 3.4rem);
+    font-size: clamp(2rem, 10vw, 2.8rem);
   }
 }
 
-/* Professional tone pass: reduce visual shouting and keep emphasis selective. */
-strong,
-b {
-  font-weight: 560;
-}
-
-h1 {
-  font-weight: 560;
-  line-height: 1.02;
-}
-
-h2,
-h3 {
-  font-weight: 540;
-}
-
-.brand strong,
-.landingBrand,
-.heroFrameTop strong,
-.sideModule strong,
-.timeline strong,
-.heroSignalGrid strong,
-.proofStrip strong,
-.workflowRail strong,
-.capabilityGrid h3,
-.faqGrid h3 {
-  font-weight: 540;
-}
-
-.sideModule span,
-.sectionKicker,
-.eyebrow,
-.landingEyebrow,
-.proofStrip span,
-.workflowRail span {
-  font-weight: 560;
-  letter-spacing: 0.065em;
-}
-
-.tablePill,
-.tableHeader,
-.scenarioRail button span,
-.analysisForm label,
-.policyGrid label {
-  font-weight: 520;
-}
-
-.landingHero h1 {
-  max-width: 780px;
-  font-size: clamp(2.35rem, 5.2vw, 4.6rem);
-  font-weight: 560;
-  line-height: 1;
-}
-
-.sectionIntro h2,
-.landingCta h2 {
-  font-size: clamp(1.45rem, 2.7vw, 2.35rem);
-  font-weight: 540;
-  line-height: 1.12;
-}
-
-.heroDecision strong {
-  font-size: clamp(1.7rem, 3.2vw, 2.6rem);
-  font-weight: 560;
-}
-
-.heroDecision b {
-  font-size: clamp(1.9rem, 4vw, 3.1rem);
-  font-weight: 540;
-}
-
-.riskDial span {
-  font-size: 1.72rem;
-  font-weight: 560;
-}
-
-.decisionBadge > div:last-child span {
-  font-size: clamp(1.3rem, 2.3vw, 1.9rem);
-  font-weight: 560;
-  line-height: 1.04;
-}
-
-.decisionBadge > div:last-child strong {
-  font-weight: 520;
-  letter-spacing: 0.06em;
-}
-
-.metric strong {
-  font-size: 1.06rem;
-  font-weight: 540;
-}
-
-.signalItem b {
-  font-size: 1.18rem;
-  font-weight: 540;
-}
-
-.landingHeroCopy > p:last-of-type {
-  font-size: clamp(1rem, 1.25vw, 1.12rem);
-}
-
-@media (max-width: 640px) {
-  .landingHero h1 {
-    font-size: clamp(2.05rem, 11vw, 3rem);
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
   }
 }
