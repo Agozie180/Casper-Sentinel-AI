@@ -5,6 +5,7 @@ import type { FormEvent } from "react";
 
 type DecisionAction = "APPROVE" | "WARN" | "BLOCK";
 type TransactionKind = "TRANSFER" | "CONTRACT_CALL" | "APPROVAL" | "UNKNOWN";
+type CasperStatus = string;
 
 type ReportSummary = {
   readonly id: string;
@@ -15,7 +16,7 @@ type ReportSummary = {
   readonly riskBand: string;
   readonly decision: DecisionAction;
   readonly policyVersion: string;
-  readonly casperStatus: string;
+  readonly casperStatus: CasperStatus;
   readonly casperTransactionHash?: string;
   readonly createdAt: string;
 };
@@ -53,7 +54,7 @@ type AnalyzeResponse = {
   readonly explanation: Explanation;
   readonly explanationHash: string;
   readonly createdAt: string;
-  readonly casperPublication: { readonly status: string; readonly reason: string };
+  readonly casperPublication: { readonly status: CasperStatus; readonly reason: string };
 };
 
 type StoredReport = ReportSummary & {
@@ -83,12 +84,13 @@ type PolicySettings = {
 };
 
 type AnalyzeMode = "safe" | "warning" | "block";
+type ApiState = "checking" | "online" | "offline";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 const navigationItems = ["Analyze", "Policy", "Reports", "Detail"] as const;
 
 const defaultPolicy: PolicySettings = {
-  version: "dashboard-mvp-policy",
+  version: "judge-demo-policy-v1",
   warnScore: "40",
   blockScore: "80",
   highValueMotes: "100000000000",
@@ -97,6 +99,70 @@ const defaultPolicy: PolicySettings = {
   allowlistedTargets: "hash-trusted-contract",
   denylistedTargets: "hash-blocked-contract",
   denylistedWallets: "",
+};
+
+const judgeDemoAnalysis: AnalyzeResponse = {
+  reportId: "local-demo-report",
+  traceId: "trace-local-demo",
+  decision: "BLOCK",
+  riskScore: { value: 94, band: "CRITICAL", confidence: 0.94 },
+  signals: [
+    {
+      id: "demo-policy-denylist",
+      detectorId: "policy-list-detector",
+      category: "POLICY",
+      severity: 96,
+      confidence: 1,
+      impact: "BLOCK",
+      observed: ["Target contract appears in the active denylist."],
+      inferred: ["The transaction violates the active enterprise policy."],
+    },
+    {
+      id: "demo-approval-scope",
+      detectorId: "approval-scope-detector",
+      category: "APPROVAL",
+      severity: 91,
+      confidence: 0.92,
+      impact: "BLOCK",
+      observed: ["Approval request is unlimited for the selected spender."],
+      inferred: ["Unlimited approvals can allow later asset movement without another user prompt."],
+    },
+    {
+      id: "demo-metadata",
+      detectorId: "metadata-detector",
+      category: "CONTRACT",
+      severity: 67,
+      confidence: 0.78,
+      impact: "WARN",
+      observed: ["Contract metadata is missing from the local verified registry."],
+      inferred: ["Unknown provenance increases review burden before signature."],
+    },
+  ],
+  reasons: ["Policy denylist matched", "Unlimited approval requested", "Contract metadata unavailable"],
+  requiredUserMessage: "Blocked before signature. Do not approve this transaction unless the policy owner explicitly clears the target.",
+  policyVersion: "judge-demo-policy-v1",
+  explanation: {
+    observedEvidence: [
+      "The target contract is policy-denylisted.",
+      "The transaction requests an unlimited approval scope.",
+      "The contract is not present in the verified metadata registry.",
+    ],
+    inferredRisk: [
+      "A malicious or compromised spender could move assets later without another approval prompt.",
+      "The missing metadata makes the contract harder to verify during a high-risk flow.",
+    ],
+    recommendation: "Block the transaction and require a policy-owner review before any signature is requested.",
+    confidence: 0.94,
+    source: "fallback",
+    promptVersion: "local-demo",
+    explanationHash: "hash-demo-explanation",
+  },
+  explanationHash: "hash-demo-explanation",
+  createdAt: "2026-07-01T00:00:00.000Z",
+  casperPublication: {
+    status: "not_queued",
+    reason: "Local judge demo only. No Casper transaction hash is claimed.",
+  },
 };
 
 export function SentinelConsole() {
@@ -110,13 +176,19 @@ export function SentinelConsole() {
   const [reports, setReports] = useState<readonly ReportSummary[]>([]);
   const [selectedReport, setSelectedReport] = useState<StoredReport | undefined>();
   const [analysis, setAnalysis] = useState<AnalyzeResponse | undefined>();
+  const [apiState, setApiState] = useState<ApiState>("checking");
   const [status, setStatus] = useState("Ready");
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const activeWallet = connectedWallet ?? walletAddress;
-  const scoreTone = analysis?.decision.toLowerCase() ?? "idle";
+  const activeAnalysis = analysis ?? judgeDemoAnalysis;
+  const scoreTone = toneForDecision(activeAnalysis.decision);
+  const displayedReports = reports.length > 0 ? reports : [toReportSummary(judgeDemoAnalysis)];
+  const highestRisk = displayedReports.reduce((max, report) => Math.max(max, report.riskScore), 0);
+  const queuedCount = displayedReports.filter((report) => report.casperStatus === "queued").length;
+  const confirmedCount = displayedReports.filter((report) => report.casperStatus === "confirmed").length;
 
   useEffect(() => {
     void refreshReports();
@@ -133,8 +205,11 @@ export function SentinelConsole() {
       if (!response.ok) throw new Error("Report history is unavailable.");
       const body = (await response.json()) as { reports: readonly ReportSummary[] };
       setReports(body.reports);
+      setApiState("online");
+      setError(undefined);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Report history is unavailable.");
+      setApiState("offline");
+      setError(caught instanceof Error ? `${caught.message} Showing local judge demo.` : "Showing local judge demo.");
     }
   }
 
@@ -157,28 +232,45 @@ export function SentinelConsole() {
 
       setAnalysis(body);
       setStatus(body.decision);
+      setApiState("online");
       await refreshReports();
       await loadReport(body.reportId);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Analysis failed.");
-      setStatus("Error");
+      const message = caught instanceof Error ? caught.message : "Analysis failed.";
+      setError(`${message} Loaded local judge demo without claiming a chain transaction.`);
+      setAnalysis(judgeDemoAnalysis);
+      setSelectedReport(toStoredReport(judgeDemoAnalysis));
+      setStatus("Local demo");
+      setApiState("offline");
     } finally {
       setIsLoading(false);
     }
   }
 
   async function loadReport(id: string) {
+    if (id === judgeDemoAnalysis.reportId) {
+      setSelectedReport(toStoredReport(judgeDemoAnalysis));
+      return;
+    }
+
     try {
       const response = await fetch(`${apiBaseUrl}/v1/reports/${id}`, { cache: "no-store" });
       if (!response.ok) throw new Error("Report detail is unavailable.");
       const body = (await response.json()) as { report: StoredReport };
       setSelectedReport(body.report);
+      setApiState("online");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Report detail is unavailable.");
+      setApiState("offline");
     }
   }
 
   async function retryPublication(id: string) {
+    if (id === judgeDemoAnalysis.reportId) {
+      setError("Local judge demo cannot publish to Casper. Use a real saved report with a configured signer.");
+      return;
+    }
+
     setIsPublishing(true);
     setError(undefined);
 
@@ -203,8 +295,9 @@ export function SentinelConsole() {
   }
 
   function connectWallet() {
-    setConnectedWallet(walletAddress.trim());
-    setStatus("Wallet connected");
+    const trimmedWallet = walletAddress.trim();
+    setConnectedWallet(trimmedWallet);
+    setStatus(trimmedWallet.length > 0 ? "Wallet connected" : "Wallet missing");
   }
 
   function applyMode(nextMode: AnalyzeMode) {
@@ -226,14 +319,22 @@ export function SentinelConsole() {
     }
   }
 
+  function loadJudgeDemo() {
+    setAnalysis(judgeDemoAnalysis);
+    setSelectedReport(toStoredReport(judgeDemoAnalysis));
+    setStatus("Local demo");
+    setError("Loaded local judge demo. No Casper transaction hash is claimed.");
+    applyMode("block");
+  }
+
   return (
     <main className="shell">
       <aside className="sidebar" aria-label="Primary navigation">
         <div className="brand">
-          <div className="brandMark" aria-hidden="true" />
+          <div className="brandMark" aria-hidden="true"><span /></div>
           <div>
-            <strong>Casper Sentinel</strong>
-            <span>Testnet console</span>
+            <strong>Casper Sentinel AI</strong>
+            <span>Autonomous transaction defense</span>
           </div>
         </div>
         <nav>
@@ -243,46 +344,68 @@ export function SentinelConsole() {
             </a>
           ))}
         </nav>
+        <div className="sideModule">
+          <span>Testnet readiness</span>
+          <strong>{confirmedCount > 0 ? "Evidence live" : "Signer required"}</strong>
+          <p>Sentinel will not display an on-chain hash until Casper RPC returns one.</p>
+        </div>
       </aside>
 
       <section className="workspace" aria-label="Security workspace">
-        <header className="topbar">
-          <div>
-            <p className="eyebrow">Autonomous security layer</p>
-            <h1>Transaction Analysis</h1>
+        <header className="heroBar">
+          <div className="heroCopy">
+            <p className="eyebrow">Pre-signature AI security layer</p>
+            <h1>Casper Sentinel AI</h1>
+            <p>
+              A command center that intercepts transaction intent, runs deterministic security policy, explains the risk,
+              and prepares verifiable Casper attestations before a user signs.
+            </p>
           </div>
-          <div className="statusCluster">
+          <div className="heroActions">
+            <span className={`statusPill ${apiState}`}>API {apiState}</span>
             <span className={`statusPill ${scoreTone}`}>{status}</span>
-            <button type="button" onClick={connectWallet}>Connect Wallet</button>
+            <button type="button" onClick={connectWallet}>Connect wallet</button>
           </div>
         </header>
 
         {error !== undefined ? <div className="alert">{error}</div> : null}
 
+        <section className="metricStrip" aria-label="Operational snapshot">
+          <Metric label="Highest risk" value={highestRisk.toString()} accent="danger" />
+          <Metric label="Reports" value={displayedReports.length.toString()} accent="info" />
+          <Metric label="Queued" value={queuedCount.toString()} accent="warning" />
+          <Metric label="Confirmed" value={confirmedCount.toString()} accent="secure" />
+        </section>
+
         <div className="analysisGrid">
-          <section className="panel" id="analyze">
+          <section className="panel intentPanel" id="analyze">
             <div className="panelHeader">
-              <h2>Intent</h2>
-              <span>{connectedWallet ?? "Wallet pending"}</span>
+              <div>
+                <p className="sectionKicker">Transaction intent</p>
+                <h2>Intercept before signature</h2>
+              </div>
+              <span>{shorten(activeWallet)}</span>
             </div>
             <form className="analysisForm" onSubmit={(event) => { void submitAnalysis(event); }}>
+              <div className="fieldPair">
+                <label>
+                  Wallet
+                  <input value={walletAddress} onChange={(event) => setWalletAddress(event.target.value)} />
+                </label>
+                <label>
+                  Entry point
+                  <input value={entryPoint} onChange={(event) => setEntryPoint(event.target.value)} />
+                </label>
+              </div>
               <label>
-                Wallet
-                <input value={walletAddress} onChange={(event) => setWalletAddress(event.target.value)} />
-              </label>
-              <label>
-                Target
+                Target contract or account
                 <input value={target} onChange={(event) => setTarget(event.target.value)} />
               </label>
               <label>
                 Amount motes
                 <input value={amountMotes} onChange={(event) => setAmountMotes(event.target.value)} />
               </label>
-              <label>
-                Entry point
-                <input value={entryPoint} onChange={(event) => setEntryPoint(event.target.value)} />
-              </label>
-              <div className="segmented" role="group" aria-label="Scenario">
+              <div className="scenarioRail" role="group" aria-label="Scenario">
                 {(["safe", "warning", "block"] as const).map((item) => (
                   <button
                     key={item}
@@ -290,32 +413,86 @@ export function SentinelConsole() {
                     className={mode === item ? "active" : ""}
                     onClick={() => applyMode(item)}
                   >
-                    {item.toUpperCase()}
+                    <span>{item}</span>
+                    <small>{labelForMode(item)}</small>
                   </button>
                 ))}
               </div>
-              <button type="submit" disabled={isLoading}>{isLoading ? "Analyzing" : "Analyze"}</button>
+              <div className="actionRow">
+                <button type="submit" disabled={isLoading}>{isLoading ? "Analyzing" : "Run Sentinel"}</button>
+                <button type="button" className="secondaryButton" onClick={loadJudgeDemo}>Judge demo</button>
+              </div>
             </form>
           </section>
 
-          <section className="panel decisionPanel" aria-label="Decision state">
+          <section className={`panel decisionPanel ${scoreTone}`} aria-label="Decision state">
             <div className="panelHeader">
-              <h2>Decision</h2>
-              <span>{analysis?.riskScore.band ?? "No score"}</span>
+              <div>
+                <p className="sectionKicker">Autonomous decision</p>
+                <h2>{activeAnalysis.riskScore.band}</h2>
+              </div>
+              <span>{activeAnalysis.explanation.confidence.toFixed(2)} confidence</span>
             </div>
-            <div className={`decisionBadge ${scoreTone}`}>{analysis?.decision ?? "PENDING"}</div>
-            <div className="scoreGrid">
-              <Metric label="Risk" value={analysis?.riskScore.value.toString() ?? "0"} />
-              <Metric label="Confidence" value={analysis?.riskScore.confidence.toFixed(2) ?? "0.00"} />
-              <Metric label="Signals" value={analysis?.signals.length.toString() ?? "0"} />
+            <div className="decisionBadge">
+              <span>{activeAnalysis.decision}</span>
+              <strong>{activeAnalysis.riskScore.value}</strong>
             </div>
-            <p className="muted">{analysis?.requiredUserMessage ?? "Awaiting transaction intent."}</p>
+            <p className="decisionMessage">{activeAnalysis.requiredUserMessage}</p>
+            <div className="timeline" aria-label="Security pipeline">
+              {pipelineSteps(activeAnalysis).map((step) => (
+                <div key={step.label} className={step.state}>
+                  <span />
+                  <strong>{step.label}</strong>
+                  <small>{step.detail}</small>
+                </div>
+              ))}
+            </div>
           </section>
         </div>
 
+        <section className="panel explanationPanel">
+          <div className="panelHeader">
+            <div>
+              <p className="sectionKicker">Analyst reasoning</p>
+              <h2>Observed facts separated from inferred risk</h2>
+            </div>
+            <span>{activeAnalysis.explanation.source}</span>
+          </div>
+          <div className="explanationGrid">
+            <EvidenceList title="Observed evidence" items={activeAnalysis.explanation.observedEvidence} />
+            <EvidenceList title="Inferred risk" items={activeAnalysis.explanation.inferredRisk} />
+          </div>
+          <p className="recommendation">{activeAnalysis.explanation.recommendation}</p>
+        </section>
+
+        <section className="panel signalPanel">
+          <div className="panelHeader">
+            <div>
+              <p className="sectionKicker">Detector stack</p>
+              <h2>Signals the agent can defend</h2>
+            </div>
+            <span>{activeAnalysis.signals.length} signals</span>
+          </div>
+          <div className="signalGrid">
+            {activeAnalysis.signals.map((signal) => (
+              <article key={signal.id} className="signalItem">
+                <div>
+                  <strong>{signal.detectorId}</strong>
+                  <span>{signal.category}</span>
+                </div>
+                <b>{signal.severity}</b>
+                <p>{signal.observed[0] ?? signal.inferred[0] ?? "Structured risk signal."}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
         <section className="panel" id="policy">
           <div className="panelHeader">
-            <h2>Policy</h2>
+            <div>
+              <p className="sectionKicker">Security policy</p>
+              <h2>Judge-tunable controls</h2>
+            </div>
             <span>{policy.version}</span>
           </div>
           <div className="policyGrid">
@@ -358,76 +535,64 @@ export function SentinelConsole() {
           </div>
         </section>
 
-        <section className="panel explanationPanel">
-          <div className="panelHeader">
-            <h2>Analyst Explanation</h2>
-            <span>{analysis?.explanation.source ?? "fallback"}</span>
-          </div>
-          <div className="explanationGrid">
-            <EvidenceList title="Observed" items={analysis?.explanation.observedEvidence ?? []} />
-            <EvidenceList title="Inferred" items={analysis?.explanation.inferredRisk ?? []} />
-          </div>
-          <p className="recommendation">{analysis?.explanation.recommendation ?? "No recommendation yet."}</p>
-        </section>
-
-        <section className="panel" id="reports">
-          <div className="panelHeader">
-            <h2>Audit Trail</h2>
-            <button type="button" className="secondaryButton" onClick={() => { void refreshReports(); }}>Refresh</button>
-          </div>
-          <div className="tableHeader" role="row">
-            <span>Wallet</span>
-            <span>Risk</span>
-            <span>Decision</span>
-            <span>Casper</span>
-          </div>
-          <div className="reportList">
-            {reports.map((report) => (
-              <button key={report.id} type="button" className="reportRow" onClick={() => { void loadReport(report.id); }}>
-                <span>{shorten(report.walletAddress)}</span>
-                <span>{report.riskScore}</span>
-                <span>{report.decision}</span>
-                <span>{report.casperStatus}</span>
-              </button>
-            ))}
-            {reports.length === 0 ? <div className="emptyRow">No analyses recorded yet.</div> : null}
-          </div>
-        </section>
-
-        <section className="panel detailPanel" id="detail">
-          <div className="panelHeader">
-            <h2>Report Detail</h2>
-            <span>{selectedReport?.id.slice(0, 8) ?? "None"}</span>
-          </div>
-          {selectedReport !== undefined ? (
-            <>
-              <div className="detailGrid">
-                <Metric label="Decision" value={selectedReport.decision} />
-                <Metric label="Risk" value={selectedReport.riskScore.toString()} />
-                <Metric label="Policy" value={selectedReport.policyVersion} />
-                <Metric label="Casper" value={selectedReport.casperStatus} />
-                <Metric label="Casper tx" value={selectedReport.casperTransactionHash !== undefined ? shorten(selectedReport.casperTransactionHash) : "Pending"} />
-                <Metric label="Intent hash" value={shorten(selectedReport.intentHash)} />
-                <Metric label="Explanation" value={shorten(selectedReport.explanationHash)} />
-                {selectedReport.casperErrorMessage !== undefined ? (
-                  <Metric label="Casper error" value={selectedReport.casperErrorMessage} />
-                ) : null}
+        <div className="lowerGrid">
+          <section className="panel" id="reports">
+            <div className="panelHeader">
+              <div>
+                <p className="sectionKicker">Audit trail</p>
+                <h2>Previous analyses</h2>
               </div>
-              <div className="detailActions">
-                <button
-                  type="button"
-                  className="secondaryButton"
-                  disabled={isPublishing || selectedReport.casperStatus === "confirmed"}
-                  onClick={() => { void retryPublication(selectedReport.id); }}
-                >
-                  {isPublishing ? "Queueing" : "Retry Publication"}
+              <button type="button" className="secondaryButton" onClick={() => { void refreshReports(); }}>Refresh</button>
+            </div>
+            <div className="tableHeader" role="row">
+              <span>Wallet</span>
+              <span>Risk</span>
+              <span>Decision</span>
+              <span>Casper</span>
+            </div>
+            <div className="reportList">
+              {displayedReports.map((report) => (
+                <button key={report.id} type="button" className="reportRow" onClick={() => { void loadReport(report.id); }}>
+                  <span>{shorten(report.walletAddress)}</span>
+                  <span>{report.riskScore}</span>
+                  <span className={toneForDecision(report.decision)}>{report.decision}</span>
+                  <span className={toneForStatus(report.casperStatus)}>{formatStatus(report.casperStatus)}</span>
                 </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="panel detailPanel" id="detail">
+            <div className="panelHeader">
+              <div>
+                <p className="sectionKicker">Attestation packet</p>
+                <h2>{selectedReport?.id.slice(0, 12) ?? activeAnalysis.reportId}</h2>
               </div>
-            </>
-          ) : (
-            <div className="emptyRow">Select a report.</div>
-          )}
-        </section>
+              <span>{formatStatus(selectedReport?.casperStatus ?? activeAnalysis.casperPublication.status)}</span>
+            </div>
+            <div className="detailGrid">
+              <Metric label="Decision" value={selectedReport?.decision ?? activeAnalysis.decision} accent={scoreTone} />
+              <Metric label="Risk" value={(selectedReport?.riskScore ?? activeAnalysis.riskScore.value).toString()} accent="danger" />
+              <Metric label="Policy" value={selectedReport?.policyVersion ?? activeAnalysis.policyVersion} accent="info" />
+              <Metric label="Casper" value={formatStatus(selectedReport?.casperStatus ?? activeAnalysis.casperPublication.status)} accent="secure" />
+              <Metric label="Casper tx" value={selectedReport?.casperTransactionHash !== undefined ? shorten(selectedReport.casperTransactionHash) : "No hash claimed"} accent="warning" />
+              <Metric label="Explanation" value={shorten(selectedReport?.explanationHash ?? activeAnalysis.explanationHash)} accent="info" />
+            </div>
+            <p className="muted detailNote">
+              {selectedReport?.casperErrorMessage ?? activeAnalysis.casperPublication.reason}
+            </p>
+            <div className="detailActions">
+              <button
+                type="button"
+                className="secondaryButton"
+                disabled={isPublishing || selectedReport?.casperStatus === "confirmed"}
+                onClick={() => { void retryPublication(selectedReport?.id ?? activeAnalysis.reportId); }}
+              >
+                {isPublishing ? "Queueing" : "Queue Casper publication"}
+              </button>
+            </div>
+          </section>
+        </div>
       </section>
     </main>
   );
@@ -501,9 +666,9 @@ function parseList(value: string): readonly string[] {
     .filter((item) => item.length > 0);
 }
 
-function Metric({ label, value }: Readonly<{ label: string; value: string }>) {
+function Metric({ label, value, accent = "info" }: Readonly<{ label: string; value: string; accent?: string }>) {
   return (
-    <div className="metric">
+    <div className={`metric ${accent}`}>
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
@@ -525,6 +690,68 @@ function EvidenceList({ title, items }: Readonly<{ title: string; items: readonl
       )}
     </div>
   );
+}
+
+function labelForMode(mode: AnalyzeMode): string {
+  if (mode === "safe") return "Trusted transfer";
+  if (mode === "warning") return "Unknown contract";
+  return "Blocked approval";
+}
+
+function toneForDecision(decision: DecisionAction): string {
+  if (decision === "APPROVE") return "approve";
+  if (decision === "WARN") return "warn";
+  return "block";
+}
+
+function toneForStatus(status: CasperStatus): string {
+  if (status === "confirmed") return "approve";
+  if (status === "submitted" || status === "queued") return "warn";
+  if (status === "failed") return "block";
+  return "idle";
+}
+
+function formatStatus(status: CasperStatus): string {
+  return status.replace(/_/gu, " ");
+}
+
+function pipelineSteps(analysis: AnalyzeResponse): readonly { label: string; detail: string; state: string }[] {
+  return [
+    { label: "Intent", detail: "Captured unsigned", state: "complete" },
+    { label: "Risk", detail: `${analysis.signals.length} detectors`, state: "complete" },
+    { label: "Decision", detail: analysis.decision, state: toneForDecision(analysis.decision) },
+    { label: "Casper", detail: formatStatus(analysis.casperPublication.status), state: toneForStatus(analysis.casperPublication.status) },
+  ];
+}
+
+function toReportSummary(analysis: AnalyzeResponse): ReportSummary {
+  return {
+    id: analysis.reportId,
+    walletAddress: "account-hash-sender",
+    target: "hash-blocked-contract",
+    transactionKind: "APPROVAL",
+    riskScore: analysis.riskScore.value,
+    riskBand: analysis.riskScore.band,
+    decision: analysis.decision,
+    policyVersion: analysis.policyVersion,
+    casperStatus: analysis.casperPublication.status,
+    createdAt: analysis.createdAt,
+  };
+}
+
+function toStoredReport(analysis: AnalyzeResponse): StoredReport {
+  return {
+    ...toReportSummary(analysis),
+    traceId: analysis.traceId,
+    explanation: analysis.explanation,
+    explanationHash: analysis.explanationHash,
+    metadataHash: "hash-demo-metadata",
+    intentHash: "hash-demo-intent",
+    confidence: analysis.riskScore.confidence,
+    signals: analysis.signals,
+    reasons: analysis.reasons,
+    requiredUserMessage: analysis.requiredUserMessage,
+  };
 }
 
 function shorten(value: string): string {

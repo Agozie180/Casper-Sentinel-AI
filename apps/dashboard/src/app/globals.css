@@ -1,16 +1,25 @@
 :root {
   color-scheme: dark;
-  --background: #07090d;
-  --sidebar: #090d14;
-  --surface: #111722;
-  --surface-strong: #172033;
-  --line: #293241;
-  --text: #eef4ff;
-  --muted: #96a3b8;
+  --background: #06080c;
+  --background-soft: #0b0f16;
+  --sidebar: #080c12;
+  --surface: #101722;
+  --surface-raised: #151f2d;
+  --surface-control: #0a1018;
+  --line: #263244;
+  --line-strong: #3b4d63;
+  --text: #f3f7ff;
+  --muted: #9ba8ba;
+  --muted-strong: #c2ccda;
   --secure: #2dd4bf;
+  --secure-soft: rgba(45, 212, 191, 0.14);
   --warning: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.14);
   --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.15);
   --info: #60a5fa;
+  --info-soft: rgba(96, 165, 250, 0.14);
+  --violet: #a78bfa;
 }
 
 * {
@@ -24,7 +33,10 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--background);
+  background:
+    linear-gradient(180deg, rgba(96, 165, 250, 0.08), transparent 340px),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.04), rgba(167, 139, 250, 0.03)),
+    var(--background);
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -32,44 +44,67 @@ body {
 button,
 a,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
 button {
-  min-height: 40px;
-  border: 1px solid rgba(45, 212, 191, 0.45);
+  min-height: 42px;
+  border: 1px solid rgba(45, 212, 191, 0.5);
   border-radius: 8px;
   background: #0f766e;
   color: white;
   padding: 0 16px;
   cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: rgba(45, 212, 191, 0.9);
+  transform: translateY(-1px);
 }
 
 button:disabled {
   cursor: wait;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
-input {
+input,
+textarea {
   min-width: 0;
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #0b111b;
+  background: var(--surface-control);
   color: var(--text);
-  padding: 10px 12px;
+  padding: 11px 12px;
+  outline: none;
+}
+
+textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+  border-color: rgba(96, 165, 250, 0.75);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.13);
 }
 
 .shell {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-columns: 272px minmax(0, 1fr);
   min-height: 100vh;
 }
 
 .sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   border-right: 1px solid var(--line);
-  background: var(--sidebar);
+  background: linear-gradient(180deg, rgba(16, 23, 34, 0.94), rgba(8, 12, 18, 0.98));
   padding: 24px;
 }
 
@@ -77,14 +112,25 @@ input {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 30px;
 }
 
 .brandMark {
-  width: 36px;
-  height: 36px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(45, 212, 191, 0.5);
   border-radius: 8px;
-  background: linear-gradient(135deg, var(--secure), var(--info));
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(96, 165, 250, 0.2));
+}
+
+.brandMark span {
+  width: 15px;
+  height: 20px;
+  border: 2px solid var(--secure);
+  border-top-width: 5px;
+  border-radius: 9px 9px 6px 6px;
 }
 
 .brand strong,
@@ -92,11 +138,18 @@ input {
   display: block;
 }
 
+.brand strong {
+  line-height: 1.15;
+}
+
 .brand span,
 .muted,
 .emptyRow,
 .metric span,
-.panelHeader span {
+.panelHeader span,
+.sideModule p,
+.signalItem span,
+.timeline small {
   color: var(--muted);
 }
 
@@ -106,16 +159,44 @@ nav {
 }
 
 nav a {
+  border: 1px solid transparent;
   border-radius: 8px;
-  color: var(--muted);
+  color: var(--muted-strong);
   padding: 10px 12px;
   text-decoration: none;
 }
 
 nav a:first-child,
 nav a:hover {
+  border-color: var(--line);
   background: var(--surface);
   color: var(--text);
+}
+
+.sideModule {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  left: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(10, 16, 24, 0.82);
+  padding: 14px;
+}
+
+.sideModule span,
+.sectionKicker,
+.eyebrow {
+  color: var(--secure);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.sideModule strong {
+  display: block;
+  margin: 8px 0 6px;
 }
 
 .workspace {
@@ -125,25 +206,42 @@ nav a:hover {
   padding: 28px;
 }
 
-.topbar,
+.heroBar,
 .panelHeader,
-.statusCluster {
+.heroActions,
+.actionRow,
+.detailActions {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 
-.statusCluster {
-  justify-content: flex-end;
+.heroBar {
+  min-height: 220px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(120deg, rgba(16, 23, 34, 0.95), rgba(9, 15, 23, 0.9)),
+    linear-gradient(90deg, rgba(45, 212, 191, 0.16), rgba(167, 139, 250, 0.12));
+  padding: clamp(22px, 4vw, 42px);
 }
 
-.eyebrow {
-  margin: 0 0 6px;
-  color: var(--secure);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
+.heroCopy {
+  max-width: 780px;
+}
+
+.heroCopy p:last-child,
+.decisionMessage,
+.detailNote {
+  color: #d5deec;
+  line-height: 1.55;
+}
+
+.heroActions {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 260px;
 }
 
 h1,
@@ -154,153 +252,256 @@ p {
 }
 
 h1 {
-  font-size: clamp(2rem, 3vw, 3.5rem);
+  margin-top: 8px;
+  font-size: clamp(2.4rem, 4vw, 4.8rem);
+  line-height: 0.96;
 }
 
 h2 {
-  font-size: 1rem;
+  margin-top: 3px;
+  font-size: 1.04rem;
 }
 
 h3 {
   font-size: 0.92rem;
 }
 
+.metricStrip,
 .analysisGrid,
-.explanationGrid {
+.explanationGrid,
+.lowerGrid,
+.signalGrid,
+.policyGrid,
+.fieldPair {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.9fr);
-  gap: 18px;
+  gap: 14px;
+}
+
+.metricStrip {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.analysisGrid {
+  grid-template-columns: minmax(0, 1.18fr) minmax(360px, 0.82fr);
+}
+
+.explanationGrid,
+.lowerGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.signalGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.policyGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.fieldPair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .panel {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  background: rgba(16, 23, 34, 0.86);
   padding: 18px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+
+.panelHeader {
+  margin-bottom: 16px;
 }
 
 .alert {
-  border: 1px solid rgba(239, 68, 68, 0.5);
+  border: 1px solid rgba(245, 158, 11, 0.45);
   border-radius: 8px;
-  background: rgba(239, 68, 68, 0.08);
-  color: #fecaca;
+  background: rgba(245, 158, 11, 0.08);
+  color: #fde7bd;
   padding: 12px 14px;
 }
 
 .statusPill {
   border: 1px solid var(--line);
   border-radius: 999px;
-  color: var(--muted);
-  min-width: 112px;
+  color: var(--muted-strong);
+  min-width: 118px;
   padding: 8px 12px;
   text-align: center;
+  text-transform: capitalize;
 }
 
-.statusPill.approve,
-.decisionBadge.approve {
+.statusPill.online,
+.approve,
+.metric.secure strong {
   color: var(--secure);
 }
 
-.statusPill.warn,
-.decisionBadge.warn {
+.statusPill.offline,
+.warn,
+.metric.warning strong {
   color: var(--warning);
 }
 
-.statusPill.block,
-.decisionBadge.block {
+.block,
+.metric.danger strong {
   color: var(--danger);
 }
 
-.analysisForm {
-  display: grid;
-  gap: 14px;
-  margin-top: 18px;
+.statusPill.checking,
+.metric.info strong {
+  color: var(--info);
 }
 
-.analysisForm label {
+.analysisForm,
+.explanationPanel,
+.detailPanel,
+.decisionPanel,
+.signalPanel {
   display: grid;
-  gap: 6px;
-  color: var(--muted);
+  gap: 14px;
+}
+
+.analysisForm label,
+.policyGrid label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted-strong);
   font-size: 0.88rem;
 }
 
 .secondaryButton {
-  border-color: var(--line);
-  background: #0b111b;
+  border-color: var(--line-strong);
+  background: var(--surface-control);
   color: var(--text);
 }
 
-.segmented {
+.scenarioRail {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
-.segmented button {
-  border-color: var(--line);
-  background: #0b111b;
-  color: var(--muted);
-  padding: 0 8px;
-}
-
-.segmented button.active {
-  border-color: rgba(96, 165, 250, 0.6);
-  background: var(--surface-strong);
-  color: var(--text);
-}
-
-.decisionPanel {
+.scenarioRail button {
   display: grid;
-  gap: 18px;
-  align-content: start;
+  height: 66px;
+  align-content: center;
+  border-color: var(--line);
+  background: var(--surface-control);
+  color: var(--muted-strong);
+  padding: 8px;
+  text-align: left;
+}
+
+.scenarioRail button span {
+  color: var(--text);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.scenarioRail button small {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scenarioRail button.active {
+  border-color: rgba(96, 165, 250, 0.7);
+  background: var(--surface-raised);
+}
+
+.decisionPanel.approve {
+  border-color: rgba(45, 212, 191, 0.45);
+}
+
+.decisionPanel.warn {
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.decisionPanel.block {
+  border-color: rgba(239, 68, 68, 0.45);
 }
 
 .decisionBadge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: var(--surface-strong);
-  color: var(--muted);
-  font-weight: 800;
+  background:
+    linear-gradient(120deg, rgba(21, 31, 45, 0.92), rgba(10, 16, 24, 0.96)),
+    var(--surface-raised);
   padding: 22px;
-  text-align: center;
 }
 
-.scoreGrid,
-.detailGrid {
+.decisionBadge span {
+  overflow-wrap: anywhere;
+  font-size: clamp(1.8rem, 4vw, 3.4rem);
+  font-weight: 900;
+  line-height: 0.95;
+}
+
+.decisionBadge strong {
+  font-size: clamp(3rem, 6vw, 5rem);
+  line-height: 0.85;
+}
+
+.timeline {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
-.detailGrid {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  margin-top: 16px;
+.timeline > div {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 0.85fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline > div > span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--info);
+}
+
+.timeline .complete > span,
+.timeline .approve > span {
+  background: var(--secure);
+}
+
+.timeline .warn > span {
+  background: var(--warning);
+}
+
+.timeline .block > span {
+  background: var(--danger);
 }
 
 .metric {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #0b111b;
+  background: var(--surface-control);
   display: grid;
-  gap: 4px;
+  gap: 5px;
+  min-height: 74px;
   min-width: 0;
   padding: 12px;
 }
 
 .metric strong {
+  min-width: 0;
   overflow-wrap: anywhere;
+  font-size: 1.1rem;
 }
 
-.explanationPanel,
-.detailPanel {
-  display: grid;
-  gap: 14px;
-}
-
-.evidenceList {
+.evidenceList,
+.signalItem {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #0b111b;
+  background: var(--surface-control);
   padding: 14px;
 }
 
@@ -312,20 +513,43 @@ h3 {
 }
 
 .evidenceList li,
-.recommendation {
+.recommendation,
+.signalItem p {
   color: #dbe7f8;
   line-height: 1.5;
+}
+
+.recommendation {
+  border-left: 3px solid var(--secure);
+  padding-left: 12px;
+}
+
+.signalItem {
+  display: grid;
+  gap: 10px;
+}
+
+.signalItem div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.signalItem b {
+  color: var(--warning);
+  font-size: 2rem;
+  line-height: 1;
 }
 
 .tableHeader,
 .reportRow {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) 0.45fr 0.7fr 0.8fr;
+  grid-template-columns: minmax(0, 1.35fr) 0.45fr 0.75fr 0.9fr;
   gap: 12px;
 }
 
 .tableHeader {
-  margin-top: 16px;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
   padding-bottom: 10px;
@@ -334,11 +558,10 @@ h3 {
 .reportList {
   display: grid;
   gap: 6px;
-  margin-top: 10px;
 }
 
 .reportRow {
-  min-height: 44px;
+  min-height: 46px;
   width: 100%;
   border-color: transparent;
   background: transparent;
@@ -349,7 +572,7 @@ h3 {
 
 .reportRow:hover {
   border-color: var(--line);
-  background: #0b111b;
+  background: var(--surface-control);
   padding-inline: 10px;
 }
 
@@ -358,73 +581,105 @@ h3 {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-transform: capitalize;
   white-space: nowrap;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.detailActions {
+  justify-content: flex-start;
 }
 
 .emptyRow {
   padding: 18px 0 4px;
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1180px) {
+  .metricStrip,
+  .signalGrid,
+  .policyGrid,
   .detailGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analysisGrid,
+  .lowerGrid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 860px) {
   .shell,
-  .analysisGrid,
-  .explanationGrid {
+  .explanationGrid,
+  .fieldPair {
     grid-template-columns: 1fr;
   }
 
   .sidebar {
+    position: static;
+    height: auto;
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
 
+  .sideModule {
+    position: static;
+    margin-top: 18px;
+  }
+
   nav {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   nav a {
     text-align: center;
   }
 
-  .topbar,
-  .statusCluster {
-    align-items: flex-start;
+  .heroBar,
+  .heroActions,
+  .panelHeader,
+  .actionRow {
+    align-items: stretch;
     flex-direction: column;
   }
 
-  .scoreGrid,
-  .detailGrid,
-  .tableHeader,
-  .reportRow {
-    grid-template-columns: 1fr 0.6fr;
+  .heroActions {
+    min-width: 0;
+  }
+
+  .heroActions button,
+  .actionRow button {
+    width: 100%;
   }
 }
 
 @media (max-width: 620px) {
+  .metricStrip,
+  .scenarioRail,
   .policyGrid,
-  .scoreGrid,
   .detailGrid,
+  .signalGrid,
   .tableHeader,
   .reportRow {
     grid-template-columns: 1fr;
   }
 
   .workspace,
-  .sidebar {
+  .sidebar,
+  .heroBar {
     padding: 18px;
   }
 
-  .detailActions {
-    justify-content: stretch;
+  .tableHeader {
+    display: none;
   }
 
-  .detailActions button {
-    width: 100%;
+  .reportRow {
+    gap: 5px;
   }
 }
-
