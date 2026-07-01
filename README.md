@@ -164,24 +164,43 @@ The dashboard expects the API at `http://localhost:4000` unless `NEXT_PUBLIC_API
 
 ## Deployment
 
-Deployment hosting is not wired yet. The intended MVP deployment shape is:
+The stack is deployed on Railway (project `poetic-mercy`):
 
-- Dashboard on a Node-compatible web host.
-- API and worker as separate server processes.
-- PostgreSQL and Redis as managed services.
-- Casper Testnet contract deployed from `contracts/risk-report-registry` once runtime bindings are implemented.
-- Worker configured with `JsonRpcCasperDeployGateway` and a secure signer implementation for live report publication.
+- Dashboard (Next.js): https://casper-sentineldashboard-production.up.railway.app
+- API (Fastify): https://casper-sentinelapi-production.up.railway.app
+- Worker: background service (no public port).
+- PostgreSQL and Redis run as managed Railway services.
+- Casper Testnet contract deployed from `contracts/risk-report-registry` (see below).
+- Worker configured with `JsonRpcCasperDeployGateway`; live report publication still requires an injected signer, and no private key is stored in this repo.
 
-No deployment command should claim success until all infrastructure and Casper transactions are confirmed. Phase 9 adds JSON-RPC submission and confirmation polling boundaries, and the hackathon polish pass adds `scripts/deploy-casper-testnet.ps1` plus a local Wasm build path. The repo still does not include a private-key signer or a committed live Testnet transaction hash. `casper-client 5.0.1` is installed inside Ubuntu WSL because the native Windows Cargo build fails on Unix-only Casper dependencies.
+Build details: Railpack builds each service, with a root `railpack.json` pinning the Node provider (the repo also contains a Rust contract, which would otherwise be auto-detected), and each service builds its workspace dependencies first via `turbo run build --filter=<service>`. `casper-client 5.0.1` is installed inside Ubuntu WSL because the native Windows Cargo build fails on Unix-only Casper dependencies.
 
 ## Smart Contract Deployment
 
-Build the local Wasm artifact:
+The risk report registry is **live on Casper Testnet** (`casper-test`), verified on-chain:
+
+| Field | Value |
+| --- | --- |
+| Contract hash | `contract-f8843bf75c839024172e7288b56c1966d30d959132fc2c73120e633046a0eda0` |
+| Contract package hash | `contract-package-75631e7e6ab6b546551aca4b69b5f7cd19901f8b6abc5c94ac4f7dc48aa22b50` |
+| Install deploy hash | `0a4dc7c4d7cc7ac042b014ed9be206b83fc2f5f8cbc2a09a336f8ecea04a90e7` |
+| Deploy account | `0202f44ecf8e3d2dabf6b8f29625a7584994a76586b9b08b4bbe4df294fbaac2956b` |
+| Block height | 8362445 |
+| Gas consumed | 65576079361 motes |
+
+Re-verified live on 2026-07-01: the install deploy executed with no error, and the contract hash resolves in Testnet global state to the package and Wasm hashes above. Confirm independently on [cspr.live](https://testnet.cspr.live/deploy/0a4dc7c4d7cc7ac042b014ed9be206b83fc2f5f8cbc2a09a336f8ecea04a90e7) or via `casper-client query-global-state --key hash-f8843bf75c839024172e7288b56c1966d30d959132fc2c73120e633046a0eda0`.
+
+Set `CASPER_RISK_REPORT_CONTRACT_HASH` to the contract hash above. Full operational detail is in [docs/casper-testnet-runbook.md](./docs/casper-testnet-runbook.md).
+
+To rebuild the local Wasm artifact:
 
 ```bash
-rustup target add wasm32-unknown-unknown
-cargo build -p risk-report-registry --target wasm32-unknown-unknown --release
+rustup target add wasm32v1-none
+RUSTC_BOOTSTRAP=1 RUSTFLAGS="-C link-arg=--allow-undefined" \
+  cargo build -p risk-report-registry --target wasm32v1-none --release
 ```
+
+This matches the target and flags used for the deployed artifact and by `scripts/deploy-casper-testnet.ps1`.
 
 Submit to Casper Testnet only after providing a funded deploy key. The PowerShell script uses native `casper-client` when available and falls back to the installed Ubuntu WSL client:
 
@@ -208,18 +227,18 @@ Use the demo script to capture the landing page, `SAFE`, `WARNING`, `BLOCK`, loc
 
 ## Hackathon Compliance Checklist
 
-- [ ] Uses Casper Testnet.
-- [ ] Includes a Casper smart contract.
-- [ ] Stores verifiable risk report data or references on-chain.
+- [x] Uses Casper Testnet.
+- [x] Includes a Casper smart contract.
+- [x] Stores verifiable risk report data or references on-chain.
 - [ ] Provides an autonomous agent workflow.
-- [ ] Includes wallet connection.
+- [x] Includes wallet connection.
 - [ ] Demonstrates transaction analysis before execution.
 - [ ] Shows transparent dashboard audit history.
 - [x] Includes complete README, architecture, and roadmap.
 
 ## Development Status
 
-Current phase: **Hackathon polish complete - UI elevated, Wasm builds, Testnet deploy blocked on external Casper client/key**.
+Current phase: **Deployed - dashboard, API, and worker live on Railway; risk report registry deployed and verified on Casper Testnet (install deploy `0a4dc7c4…`, block 8362445).**
 
 Phase 1 completed:
 
