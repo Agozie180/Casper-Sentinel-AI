@@ -203,7 +203,7 @@ Exit criteria:
 
 ## Phase 8 - Post-MVP Extension Readiness
 
-Status: next.
+Status: complete.
 
 Objective: prepare for stretch features without implementing them prematurely.
 
@@ -218,6 +218,8 @@ Tasks:
 Exit criteria:
 
 - Stretch features have documented interfaces and do not require rewriting the MVP core.
+- MVP phase roadmap is complete; future work should select a live extension or Casper deployment task.
+
 
 
 

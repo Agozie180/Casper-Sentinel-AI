@@ -138,6 +138,16 @@ importers:
         specifier: latest
         version: 4.1.9(@types/node@26.0.1)(vite@8.1.1(@types/node@26.0.1)(esbuild@0.28.1)(tsx@4.22.4))
 
+  packages/extensions:
+    dependencies:
+      '@casper-sentinel/domain':
+        specifier: workspace:*
+        version: link:../domain
+    devDependencies:
+      vitest:
+        specifier: latest
+        version: 4.1.9(@types/node@26.0.1)(vite@8.1.1(@types/node@26.0.1)(esbuild@0.28.1)(tsx@4.22.4))
+
   packages/risk-engine:
     dependencies:
       '@casper-sentinel/domain':
