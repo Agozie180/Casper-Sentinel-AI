@@ -3,6 +3,21 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
+interface CasperWalletProvider {
+  requestConnection(): Promise<boolean>;
+  disconnectFromSite(): Promise<boolean>;
+  isConnected(): Promise<boolean>;
+  getActivePublicKey(): Promise<string>;
+}
+
+type CasperWalletProviderFactory = (options?: { timeout?: number }) => CasperWalletProvider;
+
+declare global {
+  interface Window {
+    CasperWalletProvider?: CasperWalletProviderFactory;
+  }
+}
+
 type DecisionAction = "APPROVE" | "WARN" | "BLOCK";
 type TransactionKind = "TRANSFER" | "CONTRACT_CALL" | "APPROVAL" | "UNKNOWN";
 type CasperStatus = string;
@@ -194,6 +209,31 @@ export function SentinelConsole() {
     void refreshReports();
   }, []);
 
+  useEffect(() => {
+    function handleActiveKeyChanged(event: Event) {
+      const detail = (event as CustomEvent<string>).detail;
+      if (typeof detail !== "string") return;
+      try {
+        const parsed = JSON.parse(detail) as { activeKey?: string; isConnected?: boolean };
+        if (parsed.isConnected === false) {
+          setConnectedWallet(undefined);
+          setStatus("Wallet disconnected");
+          return;
+        }
+        if (typeof parsed.activeKey === "string" && parsed.activeKey.length > 0) {
+          setConnectedWallet(parsed.activeKey);
+          setWalletAddress(parsed.activeKey);
+          setStatus("Wallet connected");
+        }
+      } catch {
+        // Ignore malformed wallet events.
+      }
+    }
+
+    window.addEventListener("casper-wallet:activeKeyChanged", handleActiveKeyChanged);
+    return () => window.removeEventListener("casper-wallet:activeKeyChanged", handleActiveKeyChanged);
+  }, []);
+
   const intentPreview = useMemo(
     () => buildIntent(mode, activeWallet, target, amountMotes, entryPoint),
     [activeWallet, amountMotes, entryPoint, mode, target],
@@ -294,10 +334,45 @@ export function SentinelConsole() {
     }
   }
 
-  function connectWallet() {
-    const trimmedWallet = walletAddress.trim();
-    setConnectedWallet(trimmedWallet);
-    setStatus(trimmedWallet.length > 0 ? "Wallet connected" : "Wallet missing");
+  async function connectWallet() {
+    setError(undefined);
+
+    const providerFactory = typeof window !== "undefined" ? window.CasperWalletProvider : undefined;
+    if (typeof providerFactory !== "function") {
+      setStatus("Wallet not found");
+      setError("Casper Wallet extension was not detected. Install Casper Wallet, unlock it, then reload this page.");
+      return;
+    }
+
+    setStatus("Connecting wallet");
+    try {
+      const provider = providerFactory();
+      const connected = await provider.requestConnection();
+      if (!connected) {
+        setStatus("Connection declined");
+        setError("Casper Wallet connection request was cancelled.");
+        return;
+      }
+
+      const publicKey = await provider.getActivePublicKey();
+      setConnectedWallet(publicKey);
+      setWalletAddress(publicKey);
+      setStatus("Wallet connected");
+    } catch (caught) {
+      setStatus("Wallet error");
+      setError(caught instanceof Error ? caught.message : "Could not connect to Casper Wallet. Is the extension unlocked?");
+    }
+  }
+
+  async function disconnectWallet() {
+    const providerFactory = typeof window !== "undefined" ? window.CasperWalletProvider : undefined;
+    try {
+      await providerFactory?.().disconnectFromSite();
+    } catch {
+      // Clearing local state below is what matters even if the provider call fails.
+    }
+    setConnectedWallet(undefined);
+    setStatus("Wallet disconnected");
   }
 
   function applyMode(nextMode: AnalyzeMode) {
@@ -363,7 +438,13 @@ export function SentinelConsole() {
           <div className="heroActions">
             <span className={`statusPill ${apiState}`}>API {apiState}</span>
             <span className={`statusPill ${scoreTone}`}>{status}</span>
-            <button type="button" onClick={connectWallet}>Connect wallet</button>
+            {connectedWallet !== undefined ? (
+              <button type="button" onClick={() => { void disconnectWallet(); }}>
+                Disconnect {shorten(connectedWallet)}
+              </button>
+            ) : (
+              <button type="button" onClick={() => { void connectWallet(); }}>Connect wallet</button>
+            )}
           </div>
         </header>
 
