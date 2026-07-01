@@ -172,7 +172,7 @@ Deployment hosting is not wired yet. The intended MVP deployment shape is:
 - Casper Testnet contract deployed from `contracts/risk-report-registry` once runtime bindings are implemented.
 - Worker configured with `JsonRpcCasperDeployGateway` and a secure signer implementation for live report publication.
 
-No deployment command should claim success until all infrastructure and Casper transactions are confirmed. Phase 9 adds JSON-RPC submission and confirmation polling boundaries, and the hackathon polish pass adds `scripts/deploy-casper-testnet.ps1` plus a local Wasm build path. The repo still does not include a private-key signer, `casper-client`, or a committed live Testnet transaction hash.
+No deployment command should claim success until all infrastructure and Casper transactions are confirmed. Phase 9 adds JSON-RPC submission and confirmation polling boundaries, and the hackathon polish pass adds `scripts/deploy-casper-testnet.ps1` plus a local Wasm build path. The repo still does not include a private-key signer or a committed live Testnet transaction hash. `casper-client 5.0.1` is installed inside Ubuntu WSL because the native Windows Cargo build fails on Unix-only Casper dependencies.
 
 ## Smart Contract Deployment
 
@@ -183,13 +183,13 @@ rustup target add wasm32-unknown-unknown
 cargo build -p risk-report-registry --target wasm32-unknown-unknown --release
 ```
 
-Submit to Casper Testnet only after installing `casper-client` and providing a funded deploy key:
+Submit to Casper Testnet only after providing a funded deploy key. The PowerShell script uses native `casper-client` when available and falls back to the installed Ubuntu WSL client:
 
 ```powershell
 .\\scripts\\deploy-casper-testnet.ps1 -SecretKeyPath C:\\path\\to\\funded-testnet-secret-key.pem
 ```
 
-The script refuses to deploy without `casper-client`, the Wasm artifact, and a real key path.
+The script refuses to deploy without a Casper client, the Wasm artifact, and a real key path. In this environment the verified client is `Casper client 5.0.1` inside Ubuntu WSL.
 
 ## Screenshots
 
@@ -298,9 +298,9 @@ Hackathon polish completed:
 - Command-center dashboard redesign with stronger first impression, responsive layouts, and judge-safe local demo mode.
 - Clearer AI reasoning, detector stack, audit trail, and attestation packet presentation.
 - Local contract Wasm build verified for `wasm32-unknown-unknown`.
-- Guarded Casper Testnet deployment script added under `scripts/deploy-casper-testnet.ps1`.
+- Guarded Casper Testnet deployment script added under `scripts/deploy-casper-testnet.ps1`, with native/WSL client support.
 
-Next work: install `casper-client`, provide a funded Testnet key, deploy the contract to Testnet, then publish one real queued report and record the transaction evidence.
+Next work: provide a funded Testnet key path, deploy the contract to Testnet, then publish one real queued report and record the transaction evidence.
 
 ## References
 
